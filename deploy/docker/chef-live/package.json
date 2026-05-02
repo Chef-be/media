@@ -1,0 +1,13 @@
+{
+  "name": "chef-live",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chef Live bootstrap service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
