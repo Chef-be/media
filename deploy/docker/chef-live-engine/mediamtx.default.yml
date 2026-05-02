@@ -1,0 +1,46 @@
+logLevel: info
+logDestinations: [stdout]
+
+authMethod: internal
+authInternalUsers:
+  - user: any
+    pass:
+    permissions:
+      - action: api
+      - action: metrics
+      - action: pprof
+      - action: publish
+        path: '~^.*$'
+      - action: read
+        path: '~^.*$'
+
+api: yes
+apiAddress: ':9997'
+metrics: yes
+metricsAddress: ':9998'
+
+rtmp: yes
+rtmpAddress: ':1935'
+
+hls: yes
+hlsAddress: ':8888'
+hlsAlwaysRemux: yes
+hlsVariant: lowLatency
+hlsSegmentCount: 6
+hlsSegmentDuration: 2s
+hlsPartDuration: 200ms
+
+webrtc: yes
+webrtcAddress: ':8889'
+
+pathDefaults:
+  source: publisher
+  overridePublisher: true
+  maxReaders: 0
+  record: no
+  recordPath: '/var/lib/chef-live/records/%path/%Y-%m-%d_%H-%M-%S-%f'
+  recordFormat: fmp4
+  recordDeleteAfter: 7d
+
+paths:
+  all_others: {}
