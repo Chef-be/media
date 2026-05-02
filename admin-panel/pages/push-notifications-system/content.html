@@ -1,0 +1,137 @@
+<div class="container-fluid">
+    <div>
+        <h3>Paramètres des notifications push</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres mobile et API</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Paramètres des notifications push</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Paramètres des notifications push</h6>
+                    <div class="form_api_settings-alert"></div>
+                    <form class="api-settings" method="POST">
+                        <div class="alert alert-info">Ce système permet à votre script d'envoyer des notifications push à toute application qui utilise notre API.<br> Pour commencer, <a href="https://onesignal.com/" target="_blank">inscrivez-vous ici</a>.</div>
+                        <div class="float-left">
+                            <label for="push" class="main-label">Système de notifications push</label>
+                            <br><small class="admin-info">Activez cette fonctionnalité pour que les utilisateurs reçoivent des notifications sur leur navigateur ou leur application, même lorsqu'elle est fermée.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="push" value="0" />
+                            <input type="checkbox" name="push" id="chck-push" value="1" <?php echo ($pt->config->push == '1') ? 'checked': '';?>>
+                            <label for="chck-push" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <span class="help-block">Besoin d'aide ? <a href="https://docs.playtubescript.com/#idocs_onesingal" target="_blank">Lire la documentation</a></span>
+                        <br>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Paramètres des notifications push</h6>
+                    <div class="form_push_settings-alert"></div>
+                    <form class="push-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">ID d'application OneSignal</label>
+                                <input type="text" name="push_id" class="form-control" value="<?php echo ($pt->config->push_id);?>">
+                                <small class="admin-info"></small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Clé API REST</label>
+                                <input type="text" name="push_key" class="form-control" value="<?php echo ($pt->config->push_key);?>">
+                                <small class="admin-info"></small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+$(function() {
+    $('.switcher input[type=checkbox]').click(function () {
+        var configName = $(this).attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        if ($(this).is(":checked") === true) {
+            objData[configName] = $(this).val();
+        }
+        else{
+            if ($('input[name='+configName+']')[0]) {
+                objData[configName] = $($('input[name='+configName+']')[0]).val();
+            }
+        }
+        objData['hash_id'] = hash_id;
+        $.post('{{LINK aj/ap/save-settings}}', objData);
+    });
+
+    var setTimeOutColor = setTimeout(function (){});
+    $('select').on('change', function() {
+         clearTimeout(setTimeOutColor);
+        var thisElement = $(this);
+        var configName = thisElement.attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        objData[configName] = this.value;
+        objData['hash_id'] = hash_id;
+        thisElement.addClass('warning');
+        $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+            if (data.status == 200) {
+                thisElement.removeClass('warning');
+                thisElement.addClass('success');
+            } else {
+                thisElement.addClass('error');
+            }
+            var setTimeOutColor = setTimeout(function () {
+                thisElement.removeClass('success');
+                thisElement.removeClass('warning');
+                thisElement.removeClass('error');
+            }, 2000);
+        });
+    });
+    $('input[type=text], input[type=number] , textarea').on('input', delay(function() {
+            clearTimeout(setTimeOutColor);
+            var thisElement = $(this);
+            var configName = thisElement.attr('name');
+            var hash_id = $('input[name=hash_id]').val();
+            var objData = {};
+            objData[configName] = this.value;
+            objData['hash_id'] = hash_id;
+            thisElement.addClass('warning');
+            $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+                if (data.status == 200) {
+                    thisElement.removeClass('warning');
+                    thisElement.addClass('success');
+                } else {
+                    thisElement.addClass('error');
+                }
+                var setTimeOutColor = setTimeout(function () {
+                    thisElement.removeClass('success');
+                    thisElement.removeClass('warning');
+                    thisElement.removeClass('error');
+                }, 2000);
+                //thisElement.focus();
+            });
+    }, 500));
+});
+</script>

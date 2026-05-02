@@ -1,0 +1,123 @@
+<script type="text/javascript">
+  <?php $live_provider = PT_GetLiveProvider($pt->get_video); ?>
+	<?php if ($pt->config->live_video == 1 && !empty($pt->get_video->stream_name) && $pt->get_video->is_still_live && $pt->get_video->live_ended == 0) { ?>
+  var post_live_<?php echo $pt->get_video->id; ?> = setInterval(function(){ 
+  	setTimeout(function (argument) {
+		if($('#live_post_comments_<?php echo $pt->get_video->id; ?>').length == 0 || $('#video-id').val() != <?php echo $pt->get_video->id; ?>){
+	  		clearInterval(post_live_<?php echo $pt->get_video->id; ?>);
+	  	}
+    },10000);
+  	
+      data = {};
+      for (var i = 0; i < $('.live_comments').length; i++) {
+        if ($($('.live_comments')[i]).attr('live_comment_id')) {
+          data[i] = $($('.live_comments')[i]).attr('live_comment_id');
+        }
+      }
+      $.post("{{LINK aj/live/check_comments}}?hash=" + $('.main_session').val(), {post_id: <?php echo $pt->get_video->id; ?>,ids:data,page:"<?php echo($pt->page) ?>"}, function(data, textStatus, xhr) {
+        if (data.status == 200) {
+          if (data.still_live == 'offline') {
+            $('#live_count_<?php echo $pt->get_video->id; ?>').html(0);
+            $('[id=post-<?php echo $pt->get_video->id; ?>]').find('.comment-textarea').attr('disabled');
+            if (window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?> && window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?>.ended) {
+              window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?>.ended();
+            }
+            return false;
+          }
+          if (window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?> && window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?>.mount && !$('#post_live_video_<?php echo $pt->get_video->id; ?>').find('iframe.chef-live-reader-frame').length) {
+            window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?>.mount();
+          }
+          $('#live_post_comments_<?php echo $pt->get_video->id; ?>').append(data.html);
+          $('#live_count_<?php echo $pt->get_video->id; ?>').html(data.count);
+          $('#live_word_<?php echo $pt->get_video->id; ?>').html(data.word);
+          var comments = $('#live_post_comments_<?php echo $pt->get_video->id; ?> .live_comments');
+          if (comments.length > 4) {
+            var i;
+            for (i = 0; i < comments.length; i++) {
+              if ($('#live_post_comments_<?php echo $pt->get_video->id; ?> .live_comments').length > 4) {
+                comments[i].remove();
+              }
+            }
+          }
+          if (data.comments == 'off') {
+            $('.pt_video_comments').find('textarea').attr('disabled','true');
+            $('.pt_video_comments').find('.btn-main').attr('disabled','true');
+          }
+          else if(data.comments == 'on'){
+            $('.pt_video_comments').find('textarea').removeAttr('disabled');
+            $('.pt_video_comments').find('.btn-main').removeAttr('disabled');
+          }
+        }
+        else if(data.removed == 'yes'){
+            clearInterval(post_live_<?php echo $pt->get_video->id; ?>);
+            $('#live_count_<?php echo $pt->get_video->id; ?>').html(0);
+            $('#live_post_comments_<?php echo $pt->get_video->id; ?>').html("<h3 class='end_video_text'><?php echo(str_replace(array('{user}','{utilisateur}'), $pt->get_video->owner->name, $lang_array['stream_has_ended'])) ?></h3>");
+            //$('#live_post_comments_<?php echo $pt->get_video->id; ?>').remove();
+            $('.pt_video_comments').remove();
+            return false;
+        }
+        else{
+            clearInterval(post_live_<?php echo $pt->get_video->id; ?>);
+            $('#live_count_<?php echo $pt->get_video->id; ?>').html(0);
+            //$('#live_post_comments_<?php echo $pt->get_video->id; ?>').remove();
+            $('#live_post_comments_<?php echo $pt->get_video->id; ?>').html("<h3 class='end_video_text'><?php echo(str_replace(array('{user}','{utilisateur}'), $pt->get_video->owner->name, $lang_array['stream_has_ended'])) ?></h3>");
+            $('.pt_video_comments').remove();
+            return false;
+        }
+      });
+   }, 3000);
+
+<?php } ?>
+   <?php if ($live_provider == 'agora' && $pt->config->live_video == 1 && !empty($pt->config->agora_app_id) && !empty($pt->get_video->stream_name) && $pt->get_video->is_still_live) { ?>
+  RunLiveAgora("<?php echo $pt->get_video->stream_name; ?>","post_live_video_<?php echo($pt->get_video->id) ?>","<?php echo($pt->get_video->agora_token) ?>");
+<?php } elseif ($live_provider != 'agora' && !empty($pt->get_video->stream_name) && $pt->get_video->is_still_live) {
+    $live_metadata = PT_GetLiveMetadata($pt->get_video);
+    $chef_live_playback_url = ($live_provider == 'chef_live'
+      ? PT_GetChefLivePlaybackUrl($pt->get_video->stream_name)
+      : (!empty($live_metadata['playback_url']) ? $live_metadata['playback_url'] : PT_GetChefLivePlaybackUrl($pt->get_video->stream_name)));
+    $chef_live_webrtc_reader_url = PT_GetChefLivePlaybackWebrtcUrl($pt->get_video->stream_name) . '/?autoplay=true&controls=true&muted=true&playsinline=true';
+  ?>
+  (function() {
+    var target = $('#post_live_video_<?php echo $pt->get_video->id; ?>');
+    <?php if ($live_provider == 'chef_live') { ?>
+    var liveReaderUrl = "<?php echo $chef_live_webrtc_reader_url; ?>";
+    function mountChefLiveReader() {
+      target.html('<iframe class="chef-live-reader-frame" src="' + liveReaderUrl + '" allow="autoplay; fullscreen; picture-in-picture" style="width:100%;height:100%;min-height:420px;border:0;background:#000;"></iframe>');
+    }
+    function showChefLiveEnded() {
+      target.html("<div class='end_video_text chef-live-ended-state' style='display:flex;align-items:center;justify-content:center;height:100%;min-height:360px;text-align:center;padding:30px;'><?php echo(str_replace(array('{user}','{utilisateur}'), $pt->get_video->owner->name, $lang_array['stream_has_ended'])) ?></div>");
+    }
+    window.PT_ChefLiveWatchReader_<?php echo $pt->get_video->id; ?> = {
+      mount: mountChefLiveReader,
+      ended: showChefLiveEnded
+    };
+    mountChefLiveReader();
+    return;
+    <?php } ?>
+    var playerId = 'chef-live-player-<?php echo $pt->get_video->id; ?>';
+    target.html('<video id="' + playerId + '" controls autoplay playsinline style="width:100%;height:100%;background:#000;"></video>');
+    function attachPlayer() {
+      var video = document.getElementById(playerId);
+      var src = "<?php echo $chef_live_playback_url; ?>";
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
+        return;
+      }
+      if (window.Hls && Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+      }
+    }
+    if (window.Hls) {
+      attachPlayer();
+    } else {
+      $.getScript('https://cdn.jsdelivr.net/npm/hls.js@latest', attachPlayer);
+    }
+  })();
+<?php } elseif (!empty($pt->get_video->stream_name) && empty($pt->get_video->video_location)) { ?>
+  (function() {
+    $('#post_live_video_<?php echo $pt->get_video->id; ?>').html("<div class='end_video_text' style='display:flex;align-items:center;justify-content:center;height:100%;min-height:360px;text-align:center;padding:30px;'><?php echo(str_replace(array('{user}','{utilisateur}'), $pt->get_video->owner->name, $lang_array['stream_has_ended'])) ?></div>");
+  })();
+<?php } ?>
+</script>

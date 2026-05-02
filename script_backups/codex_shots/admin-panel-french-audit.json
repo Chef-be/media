@@ -1,0 +1,97 @@
+[
+  {
+    "page": "dashboard",
+    "url": "https://www.chef-be.fr/admin-cp/dashboard",
+    "found": []
+  },
+  {
+    "page": "manage-articles",
+    "url": "https://www.chef-be.fr/admin-cp/manage-articles",
+    "found": []
+  },
+  {
+    "page": "manage-users",
+    "url": "https://www.chef-be.fr/admin-cp/manage-users",
+    "found": []
+  },
+  {
+    "page": "manage-videos",
+    "url": "https://www.chef-be.fr/admin-cp/manage-videos",
+    "found": []
+  },
+  {
+    "page": "manage-video-reports",
+    "url": "https://www.chef-be.fr/admin-cp/manage-video-reports",
+    "found": []
+  },
+  {
+    "page": "payment-requests",
+    "url": "https://www.chef-be.fr/admin-cp/payment-requests",
+    "found": []
+  },
+  {
+    "page": "monetization-requests",
+    "url": "https://www.chef-be.fr/admin-cp/monetization-requests",
+    "found": []
+  },
+  {
+    "page": "manage-invitation",
+    "url": "https://www.chef-be.fr/admin-cp/manage-invitation",
+    "found": []
+  },
+  {
+    "page": "manage-invitation-keys",
+    "url": "https://www.chef-be.fr/admin-cp/manage-invitation-keys",
+    "found": []
+  },
+  {
+    "page": "manage-movies",
+    "url": "https://www.chef-be.fr/admin-cp/manage-movies",
+    "found": []
+  },
+  {
+    "page": "manage-activities",
+    "url": "https://www.chef-be.fr/admin-cp/manage-activities",
+    "found": []
+  },
+  {
+    "page": "manage-pages",
+    "url": "https://www.chef-be.fr/admin-cp/manage-pages",
+    "found": []
+  },
+  {
+    "page": "manage-custom-pages",
+    "url": "https://www.chef-be.fr/admin-cp/manage-custom-pages",
+    "found": []
+  },
+  {
+    "page": "manage-faqs",
+    "url": "https://www.chef-be.fr/admin-cp/manage-faqs",
+    "found": []
+  },
+  {
+    "page": "manage-themes",
+    "url": "https://www.chef-be.fr/admin-cp/manage-themes",
+    "found": []
+  },
+  {
+    "page": "earnings",
+    "url": "https://www.chef-be.fr/admin-cp/earnings",
+    "found": []
+  },
+  {
+    "page": "verification-requests",
+    "url": "https://www.chef-be.fr/admin-cp/verification-requests",
+    "found": []
+  },
+  {
+    "page": "copy_report",
+    "url": "https://www.chef-be.fr/admin-cp/copy_report",
+    "found": []
+  },
+  {
+    "page": "ban-users",
+    "url": "https://www.chef-be.fr/admin-cp/ban-users",
+    "found": []
+  }
+]

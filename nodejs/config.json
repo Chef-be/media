@@ -1,0 +1,16 @@
+{
+    "db_hostname": "localhost",
+    "db_username": "admin_chef-be",
+    "db_password": "@Sharingan06200",
+    "db_dbname": "admin_chef-be",
+    "site_url": "https:\/\/www.chef-be.fr",
+    "server_ip": "www.chef-be.fr",
+    "server_port": 3000,
+    "amazon": false,
+    "amazon_bucket": null,
+    "nodejs_message_update_interval": 500,
+    "ajax_message_update_interval": 3000,
+    "ssl": true,
+    "ssl_privatekey_full_path": "/var/www/vhosts/chef-be.fr/httpdocs/nodejs/chef-be.key",
+    "ssl_cert_full_path": "/var/www/vhosts/chef-be.fr/httpdocs/nodejs/chef-be.pem"
+}

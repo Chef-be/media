@@ -1,0 +1,403 @@
+<div class="container-fluid">
+     <div class="alert alert-warning">
+        <i class="fa fa-fw fa-exclamation-triangle"></i> <strong>Important :</strong> Vous ne pouvez pas activer deux stockages en même temps. Si vous activez le FTP, Amazon S3 sera automatiquement désactivé, et inversement.
+      </div>
+      <div>
+        <h3>Paramètres Amazon S3 et FTP</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Paramètres Amazon S3 et FTP</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6 pull-left">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Configurer Amazon S3</h6>
+                    <?php if ($pt->config->server == 'nodejs') { ?>
+                    <div class="alert alert-info "><?php echo ($pt->config->server == 'nodejs') ? "Note : si vous utilisez Node.js comme système de messagerie, veuillez redémarrer votre application Node.js (./nodejs/server.js) après avoir enregistré les modifications." : '';?></div>
+                    <?php } ?>
+                    <div class="s3-settings-alert"></div>
+                    <form class="s3-settings" method="POST">
+                        <div class="float-left">
+                            <label for="s3_upload" class="main-label">Stockage Amazon S3</label>
+                            <br><small class="admin-info">Activer Amazon S3 pour stocker vos fichiers sur Amazon S3.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="s3_upload" value="off" />
+                            <input type="checkbox" name="s3_upload" id="chck-s3_upload" value="on" <?php echo ($pt->config->s3_upload == 'on') ? 'checked': '';?>>
+                            <label for="chck-s3_upload" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom du bucket Amazon</label>
+                                <input type="text" name="s3_bucket_name" class="form-control" value="<?php echo ($pt->config->s3_bucket_name);?>">
+                                <small class="admin-info">Nom de votre bucket Amazon S3</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Clé Amazon S3</label>
+                                <input type="text" name="amazone_s3_key" class="form-control" value="<?php echo ($pt->config->amazone_s3_key);?>">
+                                <small class="admin-info">Votre clé Amazon issue des identifiants AWS</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Clé secrète Amazon S3</label>
+                                <input type="text" name="amazone_s3_s_key" class="form-control" value="<?php echo ($pt->config->amazone_s3_s_key);?>">
+                                <small class="admin-info">Votre clé secrète Amazon issue des identifiants AWS</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <label for="region">Région du bucket Amazon S3</label>
+                        <br><small class="admin-info">Région Amazon S3 utilisée</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="region" name="region">
+                              <option value="us-east-1" <?php echo ($pt->config->region == 'us-east-1')   ? ' selected' : '';?> >États-Unis Est (Virginie du Nord)</option>
+                              <option value="us-west-2" <?php echo ($pt->config->region == 'us-west-2')   ? ' selected' : '';?> >États-Unis Ouest (Oregon)</option>
+                              <option value="ap-northeast-2" <?php echo ($pt->config->region == 'ap-northeast-2')   ? ' selected' : '';?> >Asie-Pacifique (Séoul)</option>
+                              <option value="ap-south-1" <?php echo ($pt->config->region == 'ap-south-1')   ? ' selected' : '';?> >Asie-Pacifique (Mumbai)</option>
+                              <option value="ap-southeast-1" <?php echo ($pt->config->region == 'ap-southeast-1')   ? ' selected' : '';?> >Asie-Pacifique (Singapour)</option>
+                              <option value="ap-southeast-2" <?php echo ($pt->config->region == 'ap-southeast-2')   ? ' selected' : '';?> >Asie-Pacifique (Sydney)</option>
+                              <option value="ap-northeast-1" <?php echo ($pt->config->region == 'ap-northeast-1')   ? ' selected' : '';?> >Asie-Pacifique (Tokyo)</option>
+                              <option value="eu-central-1" <?php echo ($pt->config->region == 'eu-central-1')   ? ' selected' : '';?> >UE (Francfort)</option>
+                              <option value="eu-west-1" <?php echo ($pt->config->region == 'eu-west-1')   ? ' selected' : '';?> >UE (Irlande)</option>
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="clearfix"></div>
+                        <br>
+                        <div class="alert alert-info">
+                           Avant d'activer Amazon S3, assurez-vous d'avoir envoyé tout le dossier `upload/` vers votre bucket. <br><br>
+                            Avant de désactiver Amazon S3, assurez-vous d'avoir téléchargé tout le dossier `upload/` sur votre serveur.<br><br>
+                            Nous recommandons d'envoyer le dossier et les fichiers via <a href="http://s3tools.org/s3cmd">S3cmd</a>.<br><br>
+                            Si votre site est encore récent, vous pouvez ignorer cette étape d'envoi, mais veillez à cliquer sur « Tester la connexion ».<br>
+                        </div>
+                        <button type="button" class="btn btn-warning m-t-15 waves-effect test-con" onclick="pt_test_s3();">Tester la connexion</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Configuration de DigitalOcean Spaces</h6>
+                    <div class="spaces-settings-alert"></div>
+                    <form class="spaces-settings" method="POST">
+                        <div class="float-left">
+                            <label for="spaces" class="main-label">Stockage DigitalOcean Spaces</label>
+                            <br><small class="admin-info">Activer DigitalOcean Spaces pour stocker vos fichiers.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="spaces" value="off" />
+                            <input type="checkbox" name="spaces" id="chck-spaces" value="on" <?php echo ($pt->config->spaces == 'on') ? 'checked': '';?>>
+                            <label for="chck-spaces" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom de l'espace DigitalOcean</label>
+                                <input type="text" name="space_name" class="form-control" value="<?php echo ($pt->config->space_name);?>">
+                                <small class="admin-info">Nom de votre bucket DigitalOcean Spaces.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Clé DigitalOcean</label>
+                                <input type="text" name="spaces_key" class="form-control" value="<?php echo ($pt->config->spaces_key);?>">
+                                <small class="admin-info">Clé d'identification DigitalOcean Spaces.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Clé secrète DigitalOcean</label>
+                                <input type="text" name="spaces_secret" class="form-control" value="<?php echo ($pt->config->spaces_secret);?>">
+                                <small class="admin-info">Clé secrète d'identification DigitalOcean Spaces.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <label for="space_region">Région du bucket DigitalOcean</label>
+                        <br><small class="admin-info">Région utilisée pour DigitalOcean Spaces</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="space_region" name="space_region">
+                              <option value="nyc3" <?php echo ($pt->config->space_region == 'nyc3')   ? ' selected' : '';?> >New York</option>
+                              <option value="ams3" <?php echo ($pt->config->space_region == 'ams3')   ? ' selected' : '';?> >Amsterdam</option>
+                              <option value="sgp1" <?php echo ($pt->config->space_region == 'sgp1')   ? ' selected' : '';?> >Singapour</option>
+                              <option value="SFO2" <?php echo ($pt->config->space_region == 'SFO2')   ? ' selected' : '';?> >San Francisco</option>
+                              <option value="LON1" <?php echo ($pt->config->space_region == 'LON1')   ? ' selected' : '';?> >Londres</option>
+                              <option value="FRA1" <?php echo ($pt->config->space_region == 'FRA1')   ? ' selected' : '';?> >Francfort</option>
+                              <option value="TOR1" <?php echo ($pt->config->space_region == 'TOR1')   ? ' selected' : '';?> >Toronto</option>
+                              <option value="BLR1" <?php echo ($pt->config->space_region == 'BLR1')   ? ' selected' : '';?> >Bangalore</option>
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="clearfix"></div>
+                        <br>
+                        <div class="alert alert-info">
+                            Avant d'activer DigitalOcean, assurez-vous d'avoir envoyé tout le dossier `upload/` vers votre bucket. <br><br>
+                            Avant de désactiver DigitalOcean, assurez-vous d'avoir téléchargé tout le dossier `upload/` sur votre serveur. <br><br>
+                            Si votre site est encore récent, vous pouvez ignorer cette étape d'envoi, mais veillez à cliquer sur « Tester la connexion ». <br>
+                        </div>
+                        <button type="button" class="btn btn-warning m-t-15 waves-effect" onclick="Wo_TestSpaces()">Tester la connexion</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 pull-right">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Paramètres FTP</h6>
+                    <small>Vous pouvez envoyer les fichiers directement depuis votre serveur vers un autre serveur FTP et les charger depuis celui-ci.</small><br>
+                    <small>Important : cela peut ralentir la vitesse d’envoi/suppression de votre site, veillez à utiliser un serveur FTP rapide.</small><br><br>
+                    <div class="clearfix"></div>
+                    <br>
+                    <div class="ftp-settings-alert"></div>
+                    <form class="ftp-settings" method="POST">
+                        <div class="float-left">
+                            <label for="ftp_upload" class="main-label">Stockage FTP</label>
+                            <br><small class="admin-info">Activer le stockage FTP pour enregistrer vos fichiers sur votre propre serveur FTP.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="ftp_upload" value="off" />
+                            <input type="checkbox" name="ftp_upload" id="chck-ftp_upload" value="on" <?php echo ($pt->config->ftp_upload == 'on') ? 'checked': '';?>>
+                            <label for="chck-ftp_upload" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom d’hôte FTP</label>
+                                <input type="text" name="ftp_host" class="form-control" value="<?php echo ($pt->config->ftp_host);?>">
+                                <small class="admin-info">Nom d’hôte FTP, pouvant être une IP ou un nom de domaine.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom d'utilisateur FTP</label>
+                                <input type="text" name="ftp_username" class="form-control" value="<?php echo ($pt->config->ftp_username);?>">
+                                <small class="admin-info">Nom d’utilisateur de votre compte FTP.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Mot de passe FTP</label>
+                                <input type="text" name="ftp_password" class="form-control" value="<?php echo ($pt->config->ftp_password);?>">
+                                <small class="admin-info">Mot de passe de votre compte FTP.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Port FTP</label>
+                                <input type="text" name="ftp_port" class="form-control" value="<?php echo ($pt->config->ftp_port);?>">
+                                <small class="admin-info">Port de votre serveur FTP.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Chemin FTP</label>
+                                <input type="text" name="ftp_path" class="form-control" value="<?php echo ($pt->config->ftp_path);?>">
+                                <small class="admin-info">Chemin vers les fichiers `/upload`.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Point de terminaison FTP</label>
+                                <input type="text" name="ftp_endpoint" class="form-control" value="<?php echo ($pt->config->ftp_endpoint);?>">
+                                <small class="admin-info">IP ou domaine pointant vers le serveur FTP, par exemple : playtubeftpstorage.com</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="clearfix"></div>
+                        <div class="alert alert-info">
+                            Avant d'activer le FTP, assurez-vous d'avoir envoyé tout le dossier `upload/` vers votre serveur FTP.<br><br>
+                        Avant de désactiver le FTP, assurez-vous d'avoir téléchargé tout le dossier `upload/` sur votre serveur.<br><br>
+                        Si votre site est encore récent, vous pouvez ignorer cette étape d'envoi, mais veillez à cliquer sur « Tester la connexion ».<br>
+                        </div>
+                        <button type="button" class="btn btn-warning m-t-15 waves-effect" onclick="Wo_TestFTP()">Tester la connexion FTP</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+$(function() {
+    $('.switcher input[type=checkbox]').click(function () {
+        var configName = $(this).attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        if ($(this).is(":checked") === true) {
+            objData[configName] = $(this).val();
+        }
+        else{
+            if ($('input[name='+configName+']')[0]) {
+                objData[configName] = $($('input[name='+configName+']')[0]).val();
+            }
+        }
+        objData['hash_id'] = hash_id;
+        $.post('{{LINK aj/ap/save-settings}}', objData);
+    });
+
+    var setTimeOutColor = setTimeout(function (){});
+    $('select').on('change', function() {
+         clearTimeout(setTimeOutColor);
+        var thisElement = $(this);
+        var configName = thisElement.attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        objData[configName] = this.value;
+        objData['hash_id'] = hash_id;
+        thisElement.addClass('warning');
+        $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+            if (data.status == 200) {
+                thisElement.removeClass('warning');
+                thisElement.addClass('success');
+            } else {
+                thisElement.addClass('error');
+            }
+            var setTimeOutColor = setTimeout(function () {
+                thisElement.removeClass('success');
+                thisElement.removeClass('warning');
+                thisElement.removeClass('error');
+            }, 2000);
+        });
+    });
+    $('input[type=text], input[type=number] , textarea').on('input', delay(function() {
+            clearTimeout(setTimeOutColor);
+            var thisElement = $(this);
+            var configName = thisElement.attr('name');
+            var hash_id = $('input[name=hash_id]').val();
+            var objData = {};
+            objData[configName] = this.value;
+            objData['hash_id'] = hash_id;
+            thisElement.addClass('warning');
+            $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+                if (data.status == 200) {
+                    thisElement.removeClass('warning');
+                    thisElement.addClass('success');
+                } else {
+                    thisElement.addClass('error');
+                }
+                var setTimeOutColor = setTimeout(function () {
+                    thisElement.removeClass('success');
+                    thisElement.removeClass('warning');
+                    thisElement.removeClass('error');
+                }, 2000);
+                //thisElement.focus();
+            });
+    }, 500));
+});
+function Wo_TestSpaces() {
+    $('form.spaces-settings').find('.btn-warning').text('Veuillez patienter...');
+    $.get('{{LINK aj/ap/test_spaces}}', {f:'admin_setting', s: 'test_spaces'}, function (data) {
+        if (data.status == 200) {
+            $('.spaces-settings-alert').html("<div class='alert alert-success'>Connexion établie !</div>");
+            setTimeout(function () {
+                $('.spaces-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 300) {
+            $('.spaces-settings-alert').html("<div class='alert alert-danger'>Le bucket n’existe pas.</div>");
+            setTimeout(function () {
+                $('.spaces-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 500) {
+            $('.spaces-settings-alert').html("<div class='alert alert-danger'>Votre compte S3 ne possède aucun bucket, veuillez en créer un.</div>");
+            setTimeout(function () {
+                $('.spaces-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 400) {
+            $('.spaces-settings-alert').html("<div class='alert alert-danger'>"+data.message+"</div>");
+            setTimeout(function () {
+                $('.spaces-settings-alert').empty();
+            }, 2000);
+        } else  {
+            $('.spaces-settings-alert').html("<div class='alert alert-danger'>Erreur lors de la connexion à Amazon, veuillez vérifier vos informations</div>");
+            setTimeout(function () {
+                $('.spaces-settings-alert').empty();
+            }, 2000);
+        }
+        $('form.spaces-settings').find('.btn-warning').text('Tester la connexion');
+    });
+}
+function Wo_TestFTP() {
+    $('form.ftp-settings').find('.btn-warning').text('Veuillez patienter...');
+    $.get('{{LINK aj/ap/test_ftp}}', function (data) {
+        if (data.status == 200) {
+            $('.ftp-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connexion établie !</div>');
+            setTimeout(function () {
+                $('.ftp-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 400) {
+            $('.ftp-settings-alert').html('<div class="alert alert-danger">'+data.message+'</div>');
+            setTimeout(function () {
+                $('.ftp-settings-alert').empty();
+            }, 2000);
+        }
+        $('form.ftp-settings').find('.btn-warning').text('Test FTP Connection');
+    });
+}
+
+function pt_test_s3() {
+    $('.test-con').text('Veuillez patienter...');
+    $.get('{{LINK aj/ap/testS3}}',function (data) {
+        if (data.status == 200) {
+            $('.s3-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connection successfully established!</div>');
+            setTimeout(function () {
+                $('.s3-settings-alert').empty();
+            }, 2000);
+        } 
+
+    else if (data.status == 300) {
+        $('.s3-settings-alert').html("<div class='alert alert-danger'>Le bucket n’existe pas !</div>");
+        setTimeout(function () {
+            $('.s3-settings-alert').empty();
+        }, 2000);
+    } 
+
+    else if (data.status == 500) {
+        $('.s3-settings-alert').html("<div class='alert alert-danger'>Votre compte S3 ne possède aucun bucket, veuillez en créer un.</div>");
+        setTimeout(function () {
+            $('.s3-settings-alert').empty();
+        }, 2000);
+
+        } 
+
+    else if (data.status == 400) {
+        $('.s3-settings-alert').html("<div class='alert alert-danger'>"+data.message+"</div>");
+        setTimeout(function () {
+            $('.s3-settings-alert').empty();
+        }, 2000);
+        } 
+
+    else  {
+        $('.s3-settings-alert').html("<div class='alert alert-danger'>Erreur lors de la connexion à Amazon, veuillez vérifier vos informations</div>");
+        setTimeout(function () {
+            $('.s3-settings-alert').empty();
+        }, 2000);
+        }
+        $('.test-con').text('Tester la connexion');
+    });
+}
+
+</script>

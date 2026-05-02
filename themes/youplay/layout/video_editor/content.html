@@ -1,0 +1,60 @@
+<div class="content pt_shadow video-editor-page">
+    <div class="col-md-12">
+        <div class="upload-head">
+            <h4 class="edit-video-title">{{LANG video_editor}}: {{TITLE}}</h4>
+            <hr>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="pt_card">
+            <div class="pt_card_header">{{LANG editing_tools}}</div>
+            <div class="pt_card_body">
+                <div class="pt_field">
+                    <label>{{LANG trim_segments}}</label>
+                    <div class="pt_trim_controls">
+                        <input type="text" id="trim_input" class="form-control" placeholder="ex: 00:03-00:10,00:25-00:30">
+                        <small>{{LANG trim_hint}}</small>
+                    </div>
+                </div>
+                <div class="pt_field">
+                    <label>{{LANG stabilization}}</label>
+                    <select id="stab_backend" class="form-control">
+                        <option value="off">{{LANG off}}</option>
+                        <option value="deshake">Deshake (FFmpeg)</option>
+                        <option value="vidstab">Vid.Stab (si dispo)</option>
+                    </select>
+                </div>
+                <div class="pt_field">
+                    <label>{{LANG quality_preset}}</label>
+                    <select id="quality_preset" class="form-control">
+                        <option value="none">{{LANG none}}</option>
+                        <option value="clean_light">{{LANG preset_clean_light}}</option>
+                        <option value="sharp_plus">{{LANG preset_sharp_plus}}</option>
+                        <option value="denoise_strong">{{LANG preset_denoise_strong}}</option>
+                        <option value="upscale_1080">{{LANG preset_upscale_1080}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pt_card_footer">
+                <button class="btn btn-default" id="save_edl_btn">{{LANG save_draft}}</button>
+                <button class="btn btn-main" id="render_btn">{{LANG render}}</button>
+                <span id="render_status" class="muted"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="thumbnail-preview edit-thumb">
+            <img src="{{THUMBNAIL}}" alt="{{TITLE}}">
+        </div>
+        <div class="video-title">
+            <p>{{TITLE}}</p>
+        </div>
+        <video id="editor_preview" controls style="width:100%;margin-top:10px;">
+            <source src="{{VIDEO_LOCATION}}" type="video/mp4">
+        </video>
+    </div>
+    <div class="clear"></div>
+</div>
+<script src="{{CONFIG theme_url}}/js/video-editor.js?v=1"></script>

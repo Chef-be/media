@@ -1,0 +1,566 @@
+<style>
+body {background: black !important;}
+#main-container {margin-top: 0px;}
+#liveSetupModal .modal-dialog {
+	width: min(760px, calc(100vw - 32px));
+}
+#liveSetupModal .modal-content {
+	height: auto;
+	max-height: calc(100vh - 48px);
+}
+#liveSetupModal .modal-body {
+	padding-top: 4px;
+	padding-bottom: 8px;
+}
+#liveSetupModal .modal-header,
+#liveSetupModal .modal-footer {
+	background: transparent;
+}
+#liveSetupModal .modal-title {
+	font-size: 24px;
+	line-height: 1.25;
+}
+#liveSetupModal .close {
+	opacity: 0.85;
+}
+#liveSetupModal .close:hover {
+	opacity: 1;
+}
+.live-setup-form {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+.live-setup-form .alert,
+.live-setup-form small,
+.live-setup-form label,
+.live-setup-form input,
+.live-setup-form select,
+.live-setup-form code {
+	position: static;
+}
+.live-setup-select,
+.live-setup-input {
+	display: block;
+	width: 100%;
+	min-height: 46px;
+	padding: 10px 14px;
+	border: 1px solid rgba(255,255,255,0.16);
+	border-radius: 10px;
+	background: rgba(255,255,255,0.06);
+	box-shadow: none;
+	font-size: 15px;
+	line-height: 1.4;
+	color: inherit;
+}
+.live-setup-select:focus,
+.live-setup-input:focus {
+	outline: none;
+	border-color: #04abf2;
+	box-shadow: 0 0 0 3px rgba(4,171,242,0.15);
+}
+.live-setup-help {
+	display: block;
+	margin-top: -4px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #cbd5e1;
+}
+.live-setup-submit {
+	position: static;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-width: 160px;
+	line-height: 38px;
+}
+#live_stream_credentials {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+#live_stream_credentials:empty {
+	display: none;
+}
+#live_stream_credentials .chef-live-panel {
+	margin-top: 0 !important;
+}
+#live_stream_credentials .chef-live-panel strong {
+	display: block;
+	font-size: 16px;
+	line-height: 1.4;
+}
+#live_stream_credentials code {
+	display: block;
+	margin-top: 6px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: rgba(0,0,0,0.28);
+	white-space: normal;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #e8f1f8;
+}
+.live-setup-credentials-title {
+	margin: 0 0 6px;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #f1f5f9;
+}
+@media (max-width: 767px) {
+	#liveSetupModal .modal-dialog {
+		width: calc(100vw - 16px);
+	}
+	#liveSetupModal .modal-content {
+		padding: 18px;
+		max-width: none;
+	}
+	#liveSetupModal .modal-body {
+		margin: 0 -18px;
+		padding: 0 18px 8px;
+	}
+	#liveSetupModal .modal-title {
+		font-size: 21px;
+	}
+}
+</style>
+<div class="video-con wow_go_live_cont">
+		<div class="containerr">
+			<div id="remote-media">
+				<div class="liv_vid_cont" id="main_live_video"></div>
+				<h3><i class="fa fa-spin fa-spinner"></i> {{LANG please_wait}}</h3>
+				<div id="live_post_comments" class="wow_liv_comments_feed user-comments"></div>
+			</div>
+			<div class="pt_live_controls">
+				<button class="btn btn-success start_vdo_call" type="button" id="openLiveSetupModal">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M19.14,12.94A7.48,7.48 0 0,0 19.19,12A7.48,7.48 0 0,0 19.14,11.06L21.19,9.47C21.37,9.33 21.42,9.08 21.31,8.87L19.31,5.13C19.2,4.92 18.95,4.84 18.73,4.92L16.32,5.89C15.82,5.5 15.28,5.17 14.68,4.94L14.32,2.37C14.29,2.13 14.08,2 13.84,2H10.16C9.92,2 9.71,2.13 9.68,2.37L9.32,4.94C8.72,5.17 8.18,5.5 7.68,5.89L5.27,4.92C5.05,4.84 4.8,4.92 4.69,5.13L2.69,8.87C2.58,9.08 2.63,9.33 2.81,9.47L4.86,11.06A7.48,7.48 0 0,0 4.81,12A7.48,7.48 0 0,0 4.86,12.94L2.81,14.53C2.63,14.67 2.58,14.92 2.69,15.13L4.69,18.87C4.8,19.08 5.05,19.16 5.27,19.08L7.68,18.11C8.18,18.5 8.72,18.83 9.32,19.06L9.68,21.63C9.71,21.87 9.92,22 10.16,22H13.84C14.08,22 14.29,21.87 14.32,21.63L14.68,19.06C15.28,18.83 15.82,18.5 16.32,18.11L18.73,19.08C18.95,19.16 19.2,19.08 19.31,18.87L21.31,15.13C21.42,14.92 21.37,14.67 21.19,14.53L19.14,12.94M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5Z" /></svg>&nbsp;Paramétrer le live
+				</button>
+			
+				<a class="btn btn-danger end_vdo_call wow_end_live_btn hidden" href="{{LINK }}" onclick="DeleteLive()">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z" /></svg>&nbsp;{{LANG end_live}}
+				</a>
+				<div class="wow_liv_counter"><span id="live_word">{{LANG live}}</span> <span id="live_count"> 0</span></div>
+				<?php if (PT_IsAgoraEnabled()) { ?>
+					<div class="live_mic_cam_switch" style="display: none;">
+					<div class="dropdown mic_drop">
+						<button class="btn btn-mat dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{LANG mic_source}}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" /></svg></button>
+						<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" id="mic-list"></ul>
+					</div>
+					<div class="dropdown cam_drop">
+						<button class="btn btn-mat dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{LANG cam_source}}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z" /></svg></button>
+						<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" id="camera-list"></ul>
+					</div>
+					<?php //if ($pt->config->live_chat == 'on') { ?>
+						<div class="dropdown chat_drop">
+							<button class="btn btn-mat dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{LANG chating}}"><span id="chat_svg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18"></path></svg></span></button>
+							<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" id="chat-list">
+								<div class="dropdown-item pointer" onclick="LiveChating('on')">{{LANG allow_chating}}</div>
+								<div class="dropdown-item pointer" onclick="LiveChating('off')">{{LANG block_chating}}</div>
+							</ul>
+						</div>
+					<?php //} ?>
+				</div>
+			<?php } ?>
+		</div>
+		</div>
+		<input type="hidden" id="live_post_id">
+	</div>
+	<div class="modal fade matdialog" id="liveSetupModal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3 class="modal-title">Paramétrer le live</h3>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="live-setup-form">
+						<div id="live_setup_intro" class="alert alert-info">Choisissez votre mode de diffusion, complétez le titre puis créez votre live.</div>
+						<select id="live_stream_mode" class="live-setup-select">
+							<option value="browser">Direct depuis le navigateur</option>
+							<option value="encoder">Diffuser avec un logiciel ou une application</option>
+						</select>
+						<select id="live_stream_target" class="live-setup-select"></select>
+						<small id="live_stream_help" class="live-setup-help"></small>
+						<input type="text" id="live_video_name" placeholder="{{LANG video_title}}" class="live-setup-input">
+						<div id="live_existing_actions" class="alert alert-warning" style="display:none;">
+							<strong>Un live existe déjà pour ce compte.</strong>
+							<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+								<button type="button" class="btn btn-success" id="resumeExistingLiveBtn">Reprendre ce live</button>
+								<button type="button" class="btn btn-danger" id="endExistingLiveBtn">Terminer ce live</button>
+							</div>
+						</div>
+						<div id="live_browser_hint" class="alert alert-warning" style="display:none;">Le studio intégré s’ouvrira sur cette page après la création du live pour lancer la caméra et le micro.</div>
+						<div id="live_browser_settings" style="display:none;">
+							<div class="alert alert-warning" style="margin-bottom:0;">Réglages navigateur Chef Live Production. Le direct sera lancé directement depuis cette page.</div>
+							<select id="browser_video_device" class="live-setup-select">
+								<option value="none">none</option>
+							</select>
+							<select id="browser_video_codec" class="live-setup-select"></select>
+							<input type="text" id="browser_video_bitrate" value="6000" class="live-setup-input" placeholder="Débit vidéo (kbps)">
+							<input type="text" id="browser_video_framerate" value="30" class="live-setup-input" placeholder="Framerate">
+							<input type="text" id="browser_video_width" value="1280" class="live-setup-input" placeholder="Largeur">
+							<input type="text" id="browser_video_height" value="720" class="live-setup-input" placeholder="Hauteur">
+							<select id="browser_audio_device" class="live-setup-select">
+								<option value="none">none</option>
+							</select>
+							<select id="browser_audio_codec" class="live-setup-select"></select>
+							<input type="text" id="browser_audio_bitrate" value="128" class="live-setup-input" placeholder="Débit audio (kbps)">
+							<label style="display:flex;align-items:center;gap:10px;font-size:14px;line-height:1.5;">
+								<input type="checkbox" id="browser_audio_voice">
+								<span>Optimiser pour la voix</span>
+							</label>
+							<small id="live_browser_settings_help" class="live-setup-help"></small>
+						</div>
+						<div id="live_encoder_panel" style="display:none;">
+							<div class="alert alert-warning" style="margin-bottom:0;">Si vous utilisez OBS, Streamlabs, vMix ou un autre encodeur, créez d’abord le live puis utilisez les informations ci-dessous.</div>
+							<div id="live_stream_credentials"></div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="matbtn btn btn-default" data-dismiss="modal">{{LANG close}}</button>
+					<button class="btn btn-success wow_go_live_btn live-setup-submit hidden" type="button" id="publishBtn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M17,14.5V11A1,1 0 0,0 16,10H4A1,1 0 0,0 3,11V21A1,1 0 0,0 4,22H16A1,1 0 0,0 17,21V17.5L21,21.5V10.5M3,3.86L4.4,5.24C7.5,2.19 12.5,2.19 15.6,5.24L17,3.86C13.14,0.05 6.87,0.05 3,3.86M5.8,6.62L7.2,8C8.75,6.5 11.25,6.5 12.8,8L14.2,6.62C11.88,4.34 8.12,4.34 5.8,6.62Z" /></svg>&nbsp;{{LANG go_live}}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+	window.PT_LIVE_TARGETS = <?php echo(!empty($pt->live_targets_json) ? $pt->live_targets_json : '{"browser":[],"encoder":[]}'); ?>;
+	window.PT_ACTIVE_LIVE_CONTEXT = <?php echo(!empty($pt->active_live_context_json) ? $pt->active_live_context_json : 'null'); ?>;
+	</script>
+<?php if (PT_IsAgoraEnabled()) {
+  echo PT_LoadPage('live/agora');
+}
+if (PT_IsChefLiveEnabled() || !empty(PT_GetExternalLiveServers())) {
+  echo PT_LoadPage('live/chef_live');
+} ?>
+<script type="text/javascript">
+  <?php if ($pt->config->live_video == 1 && $pt->config->amazone_s3_2 == 1 && $pt->config->live_video_save != 1) { ?>
+    console.error("Creating a live stream that cloud recording is not enabled.");
+  <?php } ?>
+  <?php //if ($pt->config->live_chat == 'on') { ?>
+  function LiveChating(type) {
+    post_id = $('#live_post_id').val();
+    $.post("{{LINK aj/live/live_chating}}?hash=" + $('.main_session').val(), {type: type,post_id: post_id}, function(data, textStatus, xhr) {
+      if (data.status == 200) {
+        if (data.type == 'on') {
+          $('#chat_svg').html('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18"></path></svg>');
+        }
+        else if(data.type == 'off'){
+          $('#chat_svg').html('<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M3.439 3l-1.439-1.714 1.532-1.286 17.382 20.714-1.533 1.286-2.533-3.019h-5.848l-7 5.02v-5.02h-4v-15.981h3.439zm20.561 15.981h-2.588l-13.41-15.981h15.998v15.981z"/></svg>');
+        }
+      }
+    });
+  }
+  <?php //} ?>
+window.addEventListener('pagehide', function() {
+  if (window.PT_CloseBrowserStudioWindow) {
+    window.PT_CloseBrowserStudioWindow();
+  }
+});
+var main_live = setInterval(function(){ 
+  data = {};
+  for (var i = 0; i < $('.live_comments').length; i++) {
+    if ($($('.live_comments')[i]).attr('live_comment_id')) {
+      data[i] = $($('.live_comments')[i]).attr('live_comment_id');
+    }
+  }
+  post_id = $('#live_post_id').val();
+  if ($('#live_post_id').length == 0) {
+    clearInterval(main_live);
+  }
+  $.post("{{LINK aj/live/check_comments}}?hash=" + $('.main_session').val(), {post_id: post_id,ids:data,page:'live'}, function(data, textStatus, xhr) {
+    if (data.status == 200) {
+      $('#live_post_comments').append(data.html);
+      $('#live_count').html(data.count);
+      $('#live_word').html(data.word);
+      var comments = $('#live_post_comments .live_comments');
+      if (comments.length > 4) {
+        var i;
+        for (i = 0; i < comments.length; i++) {
+          if ($('#live_post_comments .live_comments').length > 4) {
+            comments[i].remove();
+          }
+        }
+      }
+    }
+    else if(data.removed == 'yes'){
+        clearInterval(main_live);
+        return false;
+    }
+  });
+}, 3000);
+function DeleteLive() {
+  post_id = $('#live_post_id').val();
+  window.PT_ACTIVE_LIVE_CONTEXT = null;
+  if (window.PT_CloseBrowserStudioWindow) {
+    window.PT_CloseBrowserStudioWindow();
+  }
+  $.post("{{LINK aj/live/delete}}?hash=" + $('.main_session').val(), {post_id: post_id}, function(data, textStatus, xhr) {});
+}
+function PT_ResetLiveCreationState() {
+  window.PT_ACTIVE_LIVE_CONTEXT = null;
+  $('#live_post_id').val('');
+  $('#live_existing_actions').hide();
+  $('.end_vdo_call').addClass('hidden');
+  $('#main_live_video').html('');
+  $('#remote-media h3').removeClass('hidden').html('Créez votre direct puis lancez la diffusion directement depuis cette page.');
+  PT_RenderLiveTargetOptions();
+  PT_UpdateLiveStudio();
+}
+function PT_EndExistingLiveFromModal() {
+  var post_id = $('#live_post_id').val();
+  if (!post_id && (!window.PT_ACTIVE_LIVE_CONTEXT || !window.PT_ACTIVE_LIVE_CONTEXT.post_id)) {
+    PT_ResetLiveCreationState();
+    return;
+  }
+  post_id = post_id || window.PT_ACTIVE_LIVE_CONTEXT.post_id;
+  window.PT_ACTIVE_LIVE_CONTEXT = null;
+  if (window.PT_CloseBrowserStudioWindow) {
+    window.PT_CloseBrowserStudioWindow();
+  }
+  $.post("{{LINK aj/live/delete}}?hash=" + $('.main_session').val(), {post_id: post_id}, function() {
+    PT_ResetLiveCreationState();
+  });
+}
+function PT_ResumeExistingLiveFromModal() {
+  if (window.PT_StartBrowserServerBroadcast) {
+    window.PT_StartBrowserServerBroadcast();
+  }
+}
+function PT_GetSelectedLiveTarget() {
+  var mode = $('#live_stream_mode').val();
+  var targetId = $('#live_stream_target').val();
+  var targets = (window.PT_LIVE_TARGETS && window.PT_LIVE_TARGETS[mode]) ? window.PT_LIVE_TARGETS[mode] : [];
+  for (var i = 0; i < targets.length; i++) {
+    if ((targets[i].server_id || '') === targetId) {
+      return targets[i];
+    }
+  }
+  return null;
+}
+window.PT_GetSelectedLiveTarget = PT_GetSelectedLiveTarget;
+
+function PT_RenderLiveTargetOptions() {
+  var mode = $('#live_stream_mode').val();
+  var targets = (window.PT_LIVE_TARGETS && window.PT_LIVE_TARGETS[mode]) ? window.PT_LIVE_TARGETS[mode] : [];
+  var html = '';
+  for (var i = 0; i < targets.length; i++) {
+    html += '<option value="' + (targets[i].server_id || '') + '">' + (targets[i].name || '') + '</option>';
+  }
+  $('#live_stream_target').html(html);
+}
+
+function PT_UpdateLiveStudio() {
+  var target = PT_GetSelectedLiveTarget();
+  var activeContext = window.PT_ACTIVE_LIVE_CONTEXT;
+  var hasActiveContext = !!(activeContext && activeContext.post_id);
+  $('.live_mic_cam_switch').hide();
+  $('#live_stream_credentials').html('');
+  $('#live_encoder_panel').hide();
+  $('#live_browser_hint').hide();
+  $('#live_browser_settings').hide();
+  $('#live_existing_actions').toggle(hasActiveContext);
+
+  if (!target) {
+    $('#publishBtn').addClass('hidden');
+    $('#remote-media h3').removeClass('hidden').text('Aucun serveur disponible pour ce mode.');
+    $('#live_stream_help').text('Activez au moins un serveur compatible dans le panneau administration.');
+    $('#live_setup_intro').text('Aucun serveur n’est disponible pour ce mode de diffusion.');
+    return;
+  }
+
+  $('#live_stream_help').text(target.description || '');
+
+  if ($('#live_stream_mode').val() === 'browser' && target.provider === 'agora') {
+    $('#live_setup_intro').text('Le live sera lancé directement depuis votre navigateur avec la caméra et le micro du poste.');
+    $('#live_browser_hint').show();
+    if (window.PT_LiveAgoraReady) {
+      window.PT_LiveAgoraReady();
+    }
+    return;
+  }
+
+  if ($('#live_stream_mode').val() === 'browser') {
+    $('#remote-media h3').removeClass('hidden').html('Créez votre direct puis lancez la diffusion directement depuis cette page.');
+    $('.wow_go_live_btn').removeClass('hidden');
+    $('#publishBtn').removeClass('hidden').text(hasActiveContext ? 'Reprendre la diffusion' : 'Créer et lancer le direct');
+    $('#live_setup_intro').text(hasActiveContext ? 'Un live navigateur est déjà en cours. Relancez la caméra et le micro directement depuis /live.' : 'Le live sera créé puis publié directement depuis /live avec les réglages navigateur ci-dessous.');
+    $('#live_browser_hint').show();
+    $('#live_browser_settings').show();
+    if (window.PT_InitBrowserSettingsForm) {
+      window.PT_InitBrowserSettingsForm();
+    }
+    $('#publishBtn').off('click').on('click', function () {
+      if (window.PT_StartBrowserServerBroadcast) {
+        window.PT_StartBrowserServerBroadcast();
+      }
+    });
+    return;
+  }
+
+  $('#main_live_video').html('');
+  if (window.PT_LiveEncoderReady) {
+    window.PT_LiveEncoderReady();
+  }
+}
+
+function PT_LoadExistingLiveContext() {
+  var activeContext = window.PT_ACTIVE_LIVE_CONTEXT;
+  if (!activeContext || !activeContext.post_id) {
+    return false;
+  }
+
+  $('#live_post_id').val(activeContext.post_id);
+  $('#live_video_name').val(activeContext.title || '');
+  $('.end_vdo_call').removeClass('hidden');
+
+  if (activeContext.stream_mode) {
+    $('#live_stream_mode').val(activeContext.stream_mode);
+  }
+
+  PT_RenderLiveTargetOptions();
+
+  if (activeContext.server_id) {
+    $('#live_stream_target').val(activeContext.server_id);
+  }
+
+  PT_UpdateLiveStudio();
+  return false;
+}
+
+$(function () {
+  $('#openLiveSetupModal').on('click', function () {
+    $('#liveSetupModal').modal('show');
+  });
+  if (!window.PT_ACTIVE_LIVE_CONTEXT && window.PT_LIVE_TARGETS && (!window.PT_LIVE_TARGETS.browser || !window.PT_LIVE_TARGETS.browser.length) && window.PT_LIVE_TARGETS.encoder && window.PT_LIVE_TARGETS.encoder.length) {
+    $('#live_stream_mode').val('encoder');
+  }
+  PT_RenderLiveTargetOptions();
+  PT_UpdateLiveStudio();
+  if (window.PT_ACTIVE_LIVE_CONTEXT) {
+    PT_LoadExistingLiveContext();
+  }
+  $('#liveSetupModal').modal('show');
+  $('#live_stream_mode').on('change', function () {
+    PT_RenderLiveTargetOptions();
+    PT_UpdateLiveStudio();
+  });
+  $('#live_stream_target').on('change', PT_UpdateLiveStudio);
+  $('#resumeExistingLiveBtn').on('click', PT_ResumeExistingLiveFromModal);
+  $('#endExistingLiveBtn').on('click', PT_EndExistingLiveFromModal);
+});
+
+function PT_SyncLiveViewport() {
+  var liveContainer = document.querySelector('.video-con.wow_go_live_cont');
+  if (!liveContainer) {
+    return;
+  }
+  var topOffset = Math.max(Math.ceil(liveContainer.getBoundingClientRect().top), 0);
+  var cookieBanner = document.querySelector('.cc-window');
+  var cookieOffset = 0;
+  if (cookieBanner && window.getComputedStyle(cookieBanner).display !== 'none') {
+    cookieOffset = Math.ceil(cookieBanner.getBoundingClientRect().height);
+  }
+  liveContainer.style.height = 'calc(100vh - ' + topOffset + 'px - ' + cookieOffset + 'px)';
+  liveContainer.style.marginBottom = cookieOffset > 0 ? cookieOffset + 'px' : '0';
+}
+
+$(window).on('load resize', PT_SyncLiveViewport);
+setTimeout(PT_SyncLiveViewport, 300);
+setTimeout(PT_SyncLiveViewport, 1500);
+<?php if (PT_IsAgoraEnabled()) { ?>
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+if (!navigator.getUserMedia) {
+  $('#remote-media h3').text('Sorry, WebRTC is not available in your browser.');
+}
+
+function getMedia() {
+  return new Promise((resolve, reject) => {
+    /*
+    //getusermedia constraints
+    let constraints = {
+      audio:true,
+      video: {
+        width:  { min: 640, max: 1920, ideal: 1280 },
+        height: { min: 480, max: 1080, ideal: 720 },
+        frameRate: { min: 10, max: 60, ideal: 24 },
+        advanced: [
+          // additional constraints go here, tried in order until something succeeds
+          // can attempt high level exact constraints, slowly falling back to lower ones
+          { aspectRatio: 16/9 },
+          { aspectRatio:  4/3 },
+        ]
+      }
+    } */
+
+    let constraints = {audio: true, video: true};
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(str => {
+        resolve(str);
+		$('#remote-media h3').addClass('hidden');
+        $('#remote-media .liv_vid_cont').html('<video id="basic-stream" class="hidden videostream" autoplay="" style="width: 100%;height: 100%;vertical-align: middle;"></video>');
+      }).catch(err => {
+      $('#remote-media h3').text('Could not get Media: '+err);
+      reject(err);
+    })
+  });
+}
+function base64_2_blob(dataURI) {
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+        byteString = atob(dataURI.split(',')[1]);
+    else
+        byteString = unescape(dataURI.split(',')[1]);
+
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    var ia = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ia], { type:mimeString });
+}
+function capture_video_frame(video, format) {
+    if (typeof video === 'string') {
+        video = document.getElementById(video);
+    }
+
+    format = format || 'jpeg';
+
+    if (!video || (format !== 'png' && format !== 'jpeg')) {
+        return false;
+    }
+
+    var canvas = document.createElement("canvas");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+
+    var dataUri = canvas.toDataURL('image/' + format);
+    var data = dataUri.split(',')[1];
+    var mimeType = dataUri.split(';')[0].slice(5)
+
+    var bytes = window.atob(data);
+    var buf = new ArrayBuffer(bytes.length);
+    var arr = new Uint8Array(buf);
+
+    for (var i = 0; i < bytes.length; i++) {
+        arr[i] = bytes.charCodeAt(i);
+    }
+
+    var blob = new Blob([ arr ], { type: mimeType });
+    return { blob: blob, dataUri: dataUri, format: format };
+}
+$.getScript("{{CONFIG theme_url}}/js/excanvas.js", function(data, textStatus) {});
+<?php } ?>
+</script>

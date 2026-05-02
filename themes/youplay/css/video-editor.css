@@ -1,0 +1,7 @@
+.video-editor-page .pt_card{background:#1f1f1f;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:15px}
+.video-editor-page .pt_card_header{padding:12px 16px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.06)}
+.video-editor-page .pt_card_body{padding:16px}
+.video-editor-page .pt_card_footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:10px;align-items:center}
+.video-editor-page .pt_field{margin-bottom:12px}
+.video-editor-page .pt_field label{display:block;margin-bottom:6px;opacity:.8}
+.pt_vid_editor_entry a.btn{display:inline-flex;align-items:center}

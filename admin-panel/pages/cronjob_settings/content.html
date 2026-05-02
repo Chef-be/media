@@ -1,0 +1,130 @@
+<?php
+$cron_last_run = !empty($pt->config->cronjob_last_run) ? (int)$pt->config->cronjob_last_run : 0;
+$cron_command_curl = "*/5 * * * * curl " . $pt->config->site_url . "/cronjob.php &>/dev/null";
+$cron_command_php = "*/5 * * * * php -q " . dirname(__DIR__, 3) . "/cronjob.php > /dev/null 2>&1";
+$cron_status_class = 'danger';
+$cron_status_text = 'Aucune exécution détectée';
+$cron_status_description = "Aucune exécution cron n'a encore été enregistrée.";
+
+if ($cron_last_run > 0) {
+    $minutes_since_last_run = floor((time() - $cron_last_run) / 60);
+
+    if ($minutes_since_last_run <= 10) {
+        $cron_status_class = 'success';
+        $cron_status_text = 'Cron actif';
+        $cron_status_description = "La tâche cron semble fonctionner normalement.";
+    }
+    elseif ($minutes_since_last_run <= 30) {
+        $cron_status_class = 'warning';
+        $cron_status_text = 'Cron à surveiller';
+        $cron_status_description = "La dernière exécution est ancienne. Vérifiez la planification du serveur.";
+    }
+    else {
+        $cron_status_class = 'danger';
+        $cron_status_text = 'Cron probablement inactif';
+        $cron_status_description = "La tâche cron n'a pas tourné récemment. Vérifiez votre crontab et les logs système.";
+    }
+}
+?>
+<div class="container-fluid">
+    <div>
+        <h3>Paramètres des tâches cron</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Accueil</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Paramètres des tâches cron</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-7 col-md-7">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Paramètres des tâches cron</h6>
+                    <div class="alert alert-warning">Assurez-vous d'ajouter cette tâche cron à votre crontab. Le fichier cible est `cronjob.php` et il doit s'exécuter toutes les 5 minutes avec la commande ci-dessous :</div>
+                    
+                    <form class="email-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">État du cron</label>
+                                <div class="alert alert-<?php echo $cron_status_class; ?>" style="margin-bottom: 0;">
+                                    <strong><?php echo $cron_status_text; ?></strong><br>
+                                    <?php echo $cron_status_description; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Commande cron recommandée</label>
+                                <textarea class="form-control" rows="2" readonly><?php echo $cron_command_curl; ?></textarea>
+                                <small class="admin-info">Commande simple à utiliser dans la majorité des hébergements Linux avec `curl` disponible.</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Commande alternative via PHP CLI</label>
+                                <textarea class="form-control" rows="2" readonly><?php echo $cron_command_php; ?></textarea>
+                                <small class="admin-info">Utile si `curl` est limité ou si vous préférez exécuter directement le script avec PHP.</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Dernière exécution cron</label>
+                                <p class="form-control"><?php echo !empty($cron_last_run) ? date("d-m-Y H:i:s",$cron_last_run): 'Jamais'; ?></p>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Fréquence recommandée</label>
+                                <p class="form-control">Toutes les 5 minutes</p>
+                                <small class="admin-info">Cette fréquence permet d'exécuter les traitements d'arrière-plan sans surcharger inutilement le serveur.</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Détails et vérifications</h6>
+                    <div class="alert alert-info">
+                        Cette tâche cron pilote les traitements automatiques du site.
+                    </div>
+                    <ul style="padding-left: 18px; margin-bottom: 20px;">
+                        <li>Conversions et traitements différés en arrière-plan</li>
+                        <li>Nettoyage périodique des éléments obsolètes</li>
+                        <li>Exécution des tâches planifiées dépendantes de `cronjob.php`</li>
+                    </ul>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">Checklist rapide</label>
+                            <div class="alert alert-light" style="margin-bottom: 0;">
+                                1. Ajoutez une seule entrée cron active.<br>
+                                2. Vérifiez que `curl` ou `php` est disponible sur le serveur.<br>
+                                3. Contrôlez que la date de dernière exécution évolue bien.<br>
+                                4. Si besoin, consultez les logs système de `cron`.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">Conseils</label>
+                            <div class="alert alert-secondary" style="margin-bottom: 0;">
+                                Évitez de lancer cette tâche trop souvent. Une fréquence inférieure à 5 minutes peut augmenter inutilement la charge serveur.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+</div>

@@ -1,0 +1,19 @@
+api: yes
+apiAddress: 0.0.0.0:9997
+
+rtmp: yes
+rtmpAddress: :1935
+
+hls: yes
+hlsAddress: :8888
+hlsAlwaysRemux: yes
+hlsVariant: lowLatency
+
+webrtc: yes
+webrtcAddress: :8889
+
+record: no
+
+paths:
+  all:
+    source: publisher

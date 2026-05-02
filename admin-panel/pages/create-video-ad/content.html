@@ -1,0 +1,116 @@
+<?php 
+$page = 'video';
+if (!empty($_GET['type'])) {
+	$page = PT_Secure($_GET['type']);
+}
+$page_link = 'Fichier vidéo hébergé, ex. (http://site.com/video.mp4)';
+if ($page == 'image') {
+	$page_link = 'Lien de l’image, ex. (http://site.com/image.png)';
+}
+if ($page == 'vast') {
+	$page_link = 'Lien XML, ex. (http://yourdomain.com/vast.xml)';
+}
+?>
+<div class="container-fluid">
+    <div>
+        <h3>Créer une nouvelle publicité</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Publicité</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Gérer les publicités vidéo</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Créer une nouvelle publicité</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-8 col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Créer une nouvelle publicité <?php echo ucfirst($page) ?></h6>
+                    <div class="ads-settings-alert"></div>
+                    <form class="ads-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom</label>
+                                <input type="text" id="name" name="name" class="form-control">
+                                
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label"><?php echo $page_link ?></label>
+                                <input type="text" id="link" name="link" class="form-control">
+                                
+                            </div>
+                        </div>
+                        <?php if ($page != 'vast') { ?>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">URL vers laquelle rediriger l’utilisateur après un clic sur la publicité</label>
+                                <input type="text" name="ad_link" class="form-control">
+                                
+                            </div>
+                        </div>
+                        <?php } ?>
+                        
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Secondes avant pouvoir passer la publicité (0 = désactivé)</label>
+                                <input type="text" id="skip_seconds" name="skip_seconds" class="form-control" value="0">
+                                
+                            </div>
+                        </div>
+                        <?php if ($page == 'vast') { ?>
+                        <label for="vast_type">Type</label>
+                        <div class="form-group">
+                            <input type="radio" name="vast_type" id="vast_type-enabled" value="vast" checked>
+                            <label for="vast_type-enabled">VAST</label>
+                            <input type="radio" name="vast_type" id="vast_type-disabled" value="vpaid">
+                            <label for="vast_type-disabled" class="m-l-20">VPAID</label>
+                        </div>
+                        <?php } ?>
+                        <input type="hidden" value="<?php echo $page ?>" name="type">
+                        <button type="submit" class="btn btn-primary m-t-15 waves-effect">Créer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+$(function() {
+    var form_ads_settings = $('form.ads-settings');
+
+    form_ads_settings.ajaxForm({
+        url: '{{LINK aj/ap/create-ads}}',
+        beforeSend: function() {
+            form_ads_settings.find('button').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            if (data.status == 200) {
+            	$('.ads-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Nouvelle publicité créée avec succès</div>');
+            	setTimeout(function () {
+            		$('.ads-settings-alert').empty();
+            		window.location.href = '{{LINK admin-cp/manage-video-ads}}';
+            	}, 2000);
+            } else {
+                $('.ads-settings-alert').html('<div class="alert alert-danger">'+data.error+'</div>');
+                setTimeout(function () {
+                    $('.ads-settings-alert').empty();
+                    window.location.href = '{{LINK admin-cp/manage-video-ads}}';
+                }, 2000);
+            }
+            form_ads_settings.find('button').text('Enregistrer');
+        }
+    });
+});
+</script>

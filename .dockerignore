@@ -1,0 +1,13 @@
+.git
+.gitignore
+nodejs/node_modules
+script_backups
+upload
+chef-be.zip
+*.log
+tmp
+.env
+.env.*
+!.env.docker.example
+!.env.docker.local.example
+tmp_screens

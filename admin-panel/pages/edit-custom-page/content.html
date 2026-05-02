@@ -1,0 +1,99 @@
+<?php
+if (empty($_GET['id'])) {
+   header("Location: " . $pt->config->site_url);
+   exit();
+}
+ $page = $db->where('page_name',PT_Secure($_GET['id']))->getOne(T_CUSTOM_PAGES);
+ $page = ToArray($page);
+if (empty($page)) {
+   header("Location: " . $pt->config->site_url);
+   exit();
+}
+?>
+<div class="container-fluid">
+    <div>
+        <h3>Modifier la page personnalisée</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Panneau d'administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Pages du site</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Modifier la page personnalisée</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-8 col-md-8">
+            <div class="card">
+                <div class="card-body">
+                     <h6 class="card-title">Modifier la page personnalisée : <?php echo $page['page_title'] ?></h6>
+                    <div class="add-settings-alert"></div>
+                    <form class="add-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom de la page <small><?php echo $pt->config->site_url . '/site-pages/PAGE_NAME'?></small></label>
+                                <input type="text" id="page_name" name="page_name" class="form-control" value="<?php echo $page['page_name'];?>">
+                                
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Titre de la page <small>Le titre de la page affiché dans le pied de page</small></label>
+                                <input type="text" id="page_title" name="page_title" class="form-control" value="<?php echo $page['page_title'];?>">
+                                
+                            </div>
+                        </div>
+                         <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Contenu de la page <small>Le contenu de la page (HTML autorisé)</small></label>
+                                <textarea name="page_content" id="page_content" class="form-control" cols="30" rows="5"><?php echo br2nl($page['page_content']);?></textarea>
+                                
+                            </div>
+                        </div>
+                        <label for="page_type">Type de page</label>
+                        <select class="form-control show-tick " id="page_type" name="page_type">
+                            <option value="1" <?php echo ($page['page_type'] == 1) ? 'selected': '';?>>Inclure l'arrière-plan et l'en-tête</option>
+                 			<option value="0" <?php echo ($page['page_type'] == 0) ? 'selected': '';?>>Page vide</option>
+                        </select>
+                        <div class="clearfix"></div>
+                        <br>
+                        <input type="hidden" value="<?php echo $page['id'];?>" name="page_id">
+                        <button type="submit" class="btn btn-primary m-t-15 waves-effect">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+
+$(function() {
+    var form_add_settings = $('form.add-settings');
+    form_add_settings.ajaxForm({
+        url: '{{LINK aj/ap/edit_page}}',
+        beforeSend: function() {
+            form_add_settings.find('.waves-effect').text('Veuillez patienter...');
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+                $('.add-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Page mise à jour avec succès</div>');
+                setTimeout(function () {
+		            window.location.href = '<?php echo PT_LoadAdminLinkSettings('manage-custom-pages'); ?>';
+		        }, 1000);
+            } else if (data.status == 400) {
+                $('.add-settings-alert').html('<div class="alert alert-danger">'+data.message+'</div>');
+                setTimeout(function () {
+                    $('.add-settings-alert').html('');
+                }, 1000);
+	        }
+	        form_add_settings.find('.waves-effect').text('Enregistrer');
+        }
+    });
+});
+</script>

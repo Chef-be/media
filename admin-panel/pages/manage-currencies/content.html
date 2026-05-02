@@ -1,0 +1,282 @@
+<div class="container-fluid">
+    <div class="alert alert-warning">
+      <i class="fa fa-question-circle fa-fw"></i>Veuillez noter que toutes les devises ne sont pas prises en charge par PayPal, Stripe, 2Checkout et Alipay. Si la devise que vous ajoutez n'est pas prise en charge, vous pouvez définir la devise de paiement par défaut pour chaque méthode depuis les <a href="<?php echo PT_LoadAdminLinkSettings('payment-settings'); ?>">paramètres de paiement</a>.
+    </div>
+    <div>
+        <h3>Gérer les devises</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Panneau d'administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Gérer les devises</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+    	<div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Ajouter une devise</h6>
+                     <div class="add-curreny-settings-alert"></div>
+                    <form class="add-curreny-settings" method="POST">
+
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Code devise (ex. : USD)</label>
+                                <input type="text" id="currency" name="currency" class="form-control">
+                                
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Symbole de la devise (ex. : $)</label>
+                                <input type="text" id="currency_symbol" name="currency_symbol" class="form-control">
+                                
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <br><br>
+                        <button type="submit" class="btn btn-primary m-t-15 waves-effect">Ajouter</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Devises</h6>
+                   <div class="clearfix"></div>
+                   <div class="table-responsive1">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="60"><input type="checkbox" id="check-all" class="filled-in check-all" ><label for="check-all"></label></th>
+                                      <th width="100">ID</th>
+					                  <th>Code devise</th>
+					                  <th>Symbole</th>
+                            <th>Statut</th>
+					                  <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               <?php 
+				               foreach ($pt->config->currency_array  as $pt->currency_key => $pt->currency_value) {
+				                  echo PT_LoadAdminPage('manage-currencies/list');
+				                }
+				               ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-3">
+                            <span>&nbsp;</span>
+                            <button type="button" class="btn btn-info waves-effect delete-selected d-block" disabled>Supprimer la sélection<span></span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+
+    </div>
+    <!-- #END# Vertical Layout -->
+    <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModal1Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModal1Label">Supprimer la devise ?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Êtes-vous sûr de vouloir supprimer cette devise ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="SelectedDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModal1Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModal1Label">Supprimer la devise ?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Êtes-vous sûr de vouloir supprimer les devises sélectionnées ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" onclick="DeleteSelected()" data-dismiss="modal">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $('.check-all').on('click', function(event) {
+        $('input:checkbox').not(this).prop('checked', this.checked);
+    });
+    $('.delete-checkbox, .check-all').change(function(event) {
+        $('.delete-selected').attr('disabled', false);
+        $('.delete-selected').find('span').text(' (' + $('.delete-checkbox:checked').length + ')');
+    });
+    $('.submit-selected').on('click', function(event) {
+        event.preventDefault();
+        $('#SelectedStatusModal').modal('show');
+    });
+
+    $('.delete-selected').on('click', function(event) {
+        event.preventDefault();
+        $('#SelectedDeleteModal').modal('show');
+    });
+    function DeleteSelected() {
+        data = new Array();
+        $('td input:checked').parents('tr').each(function () {
+            data.push($(this).attr('data_selected'));
+        });
+        $('.delete-selected').attr('disabled', true);
+        $('.delete-selected').text('Veuillez patienter...');
+        $.post("{{LINK aj/ap/remove_multi_curreny}}", {ids: data}, function () {
+            $.each( data, function( index, value ){
+                $('#currency_' + value).remove();
+            });
+            $('.delete-selected').text('Supprimer la sélection');
+        });
+    }
+
+function delete_currency(currency,type = 'show') {
+  if (type == 'hide') {
+    $('#DeleteModal').find('.btn-primary').attr('onclick', "delete_currency('"+currency+"')");
+    $('#DeleteModal').modal('show');
+    return false;
+  }
+  $.post('{{LINK aj/ap/remove__curreny}}', {currency: currency}, function(data, textStatus, xhr) {
+    if (data.status == 200) {
+        $('#currency_'+currency).remove();
+    }
+  });
+}
+function open_edit_currency(currency,currency_symbol,currency_id) {
+  $('#defaultModal').modal('show');
+  $('#edit_currency').val(currency);
+  $('#edit_currency_symbol').val(currency_symbol);
+  $('#edit_currency_id').val(currency_id);
+}
+
+function make_default(currency) {
+  $.post('{{LINK aj/ap/select_currency}}', {currency: currency}, function(data, textStatus, xhr) {
+    if (data.status == 200) {
+            location.reload();
+    }
+  });
+}
+function Wo_SubmitCurrencyForm() {
+  $('.edit-curreny-settings').submit();
+}
+$(function() {
+var form_add_site_settings = $('form.add-curreny-settings');
+form_add_site_settings.ajaxForm({
+    url: '{{LINK aj/ap/add_new_curreny}}',
+    beforeSend: function() {
+        form_add_site_settings.find('.waves-effect').text('Veuillez patienter...');
+    },
+    success: function(data) {
+        if (data.status == 200) {
+            form_add_site_settings.find('.waves-effect').text('Enregistrer');
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            $('.add-curreny-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Devise ajoutée avec succès</div>');
+            setTimeout(function () {
+                $('.add-curreny-settings-alert').empty();
+                location.reload();
+            }, 2000);
+        }
+        else{
+            form_add_site_settings.find('.waves-effect').text('Enregistrer');
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            $('.add-curreny-settings-alert').html('<div class="alert alert-danger">Veuillez vérifier vos informations</div>');
+            setTimeout(function () {
+                $('.add-curreny-settings-alert').empty();
+            }, 2000);
+        }
+    }
+});
+
+var form_edit_site_settings = $('form.edit-curreny-settings');
+form_edit_site_settings.ajaxForm({
+    url: '{{LINK aj/ap/edit_curreny}}',
+    beforeSend: function() {
+        form_edit_site_settings.find('.waves-effect').text('Veuillez patienter...');
+    },
+    success: function(data) {
+        if (data.status == 200) {
+            form_edit_site_settings.find('.waves-effect').text('ENREGISTRER LES MODIFICATIONS');
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            $('.edit-curreny-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Devise modifiée avec succès</div>');
+            setTimeout(function () {
+                $('.edit-curreny-settings-alert').empty();
+                location.reload();
+            }, 2000);
+        }
+        else{
+            form_edit_site_settings.find('.waves-effect').text('ENREGISTRER LES MODIFICATIONS');
+            $("html, body").animate({ scrollTop: 0 }, "slow");
+            $('.edit-curreny-settings-alert').html('<div class="alert alert-danger">Veuillez vérifier vos informations</div>');
+            setTimeout(function () {
+                $('.edit-curreny-settings-alert').empty();
+            }, 2000);
+        }
+    }
+});
+});
+
+</script>
+<div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-labelledby="exampleModal1Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModal1Label">Modifier la devise</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="edit-curreny-settings-alert"></div>
+                    <form class="edit-curreny-settings" method="POST">
+
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Code devise (ex. : USD)</label>
+                                <input type="text" id="edit_currency" name="currency" class="form-control" placeholder="Code devise (ex. : USD)">
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Symbole de la devise (ex. : $)</label>
+                                <input type="text" id="edit_currency_symbol" name="currency_symbol" class="form-control" placeholder="Symbole de la devise (ex. : $)">
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <br><br>
+                        <input type="hidden" name="currency_id" id="edit_currency_id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" onclick="Wo_SubmitCurrencyForm();">ENREGISTRER LES MODIFICATIONS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+

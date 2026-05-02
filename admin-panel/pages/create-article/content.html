@@ -1,0 +1,266 @@
+<div class="container-fluid">
+    <div>
+        <h3>Créer un nouvel article</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Panneau d'administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Articles</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Créer un nouvel article</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Créer un nouvel article</h6>
+                    <div class="create-article-alert"></div>
+
+                    <form class="form submit-new-article-settings" method="POST">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group form-float">
+                                    <div class="form-line">
+                                        <label>Saisir un titre</label>
+                                        <input type="text" class="form-control" name="title" placeholder="Saisir un titre">
+                                    </div>
+                                </div>
+                                <div class="form-group form-float">
+                                    <div class="form-line">
+                                        <label>Saisir une description</label>
+                                        <textarea name="description" class="form-control" placeholder="Saisir une description"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group form-float">
+                                    <div class="form-line">
+                                        <textarea name="text" id="new-article"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group form-float">
+                                    <div class="form-line">
+                                        <div class="preview-article-image">
+                                            <div>
+                                                <i class="material-icons">add_to_photos</i> <span> Sélectionner une image</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-float">
+                                    <div class="form-line">
+                                        <label for="article-tags" class="width-100">Catégorie</label>
+                                        <select name="category" class="form-control">
+                                            <?php foreach ($pt->categories as $cat_id => $category): ?>
+                                                <option value="<?php echo $cat_id;?>">
+                                                    <?php echo $category;?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group form-float">
+                                    <div class="form-line">
+                                        <label for="article-tags" class="width-100">Étiquettes</label>
+                                        <div class="bootstrap-tagit-wrapper">
+                                            <input id="article-tags" type="text" class="form-control" name="tags">
+                                        </div>
+                                        <div class="clear"></div>
+                                    </div>
+                                </div>
+
+                                <div class="article-action-buttons">
+                                    <button type="submit" class="btn btn-primary m-t-15 waves-effect article-action-btn article-action-btn-primary">Publier</button>
+                                    <button type="submit" name="draft" class="btn m-t-15 waves-effect article-action-btn article-action-btn-secondary">Enregistrer le brouillon</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="file" class="hidden" id="article-image" name="image">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+
+<style type="text/css">
+    .submit-new-article-settings .preview-article-image {
+        width: 100%;
+        min-height: 150px;
+        max-height: 250px;
+        overflow: hidden;
+        background: #fff;
+        border: 3px dashed #00b0e4;
+        cursor: pointer;
+        display: table;
+        -webkit-transition: ease-in .27s all;
+        transition: ease-in .27s all;
+    }
+    .submit-new-article-settings .preview-article-image div {
+        width: 100%;
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        line-height: 30px;
+    }
+    .submit-new-article-settings .preview-article-image div i {
+        vertical-align: middle;
+    }
+    .submit-new-article-settings .preview-article-image div span {
+        height: 100%;
+        display: inline-block;
+    }
+    .article-action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 8px;
+    }
+    .article-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 220px;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        letter-spacing: .01em;
+        border: 1px solid transparent;
+        box-shadow: none;
+    }
+    .article-action-btn-primary {
+        box-shadow: 0 10px 22px rgba(59, 130, 246, .18);
+    }
+    .article-action-btn-secondary {
+        background: #eef4fb;
+        border-color: #d7e4f2;
+        color: #1e293b;
+    }
+    .article-action-btn-secondary:hover,
+    .article-action-btn-secondary:focus {
+        background: #e2ecf8;
+        color: #0f172a;
+    }
+    body.dark .article-action-btn-secondary {
+        background: #182433;
+        border-color: #304155;
+        color: #dbe7f3;
+    }
+    body.dark .article-action-btn-secondary:hover,
+    body.dark .article-action-btn-secondary:focus {
+        background: #213247;
+        color: #f8fafc;
+    }
+</style>
+
+<script>
+jQuery(document).ready(function($) {
+    PT_AdminInitTinyMCE({
+        selector: '#new-article',
+        height: 500,
+        auto_focus: 'element1',
+        images_upload_url: '{{LINK aj/ap/tinymce-upload}}',
+        language_url: '{{CONFIG theme_url}}/js/tinymce/js/tinymce/langs/fr_FR.js',
+        language: "fr_FR"
+    });
+
+    $(".preview-article-image").on("click", function() {
+        $("#article-image").trigger("click");
+    });
+
+    $("#article-image").on("change", function() {
+        var self = $(this);
+        var image_blob = false;
+
+        if (window.URL !== undefined) {
+            image_blob = window.URL.createObjectURL(self.prop('files')[0]);
+        } else if (window.webkitURL !== undefined) {
+            image_blob = window.webkitURL.createObjectURL(self.prop('files')[0]);
+        }
+
+        if (image_blob) {
+            $(".preview-article-image").html("<img src='" + image_blob + "' alt='Image'>");
+        }
+    });
+
+    $(function() {
+        $('#article-tags').tagsinput();
+
+        var form = $(".submit-new-article-settings");
+
+        form.on("submit", function() {
+            var text    = tinymce.activeEditor.getContent({format: 'raw'});
+            var message = $(".create-article-alert");
+
+            if (!text) {
+                scrollToTop();
+                message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Une erreur s'est produite. Veuillez réessayer&nbsp;!</div>");
+                setTimeout(function(){ window.location.reload(); }, 1000);
+                return false;
+            } else {
+                $("#new-article").val(text);
+            }
+        });
+
+        form.ajaxForm({
+            url: "{{LINK aj/ap/new-article}}",
+            type: "POST",
+            dataType: "json",
+            beforeSend: function() {},
+            success: function(data) {
+                var message = $(".create-article-alert");
+
+                if (data.status == 200) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-success'><i class='fa fa-exclamation-circle'></i> Le nouvel article a été ajouté avec succès&nbsp;!</div>");
+                    setTimeout(function(){ window.location.href = data.url; }, 1000);
+                }
+                else if (data.status == 400) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Veuillez renseigner les informations requises&nbsp;!</div>");
+                }
+                else if (data.status == 401) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Le titre de l'article est trop court&nbsp;!</div>");
+                }
+                else if (data.status == 402) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> La description de l'article est trop courte&nbsp;!</div>");
+                }
+                else if (data.status == 403) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Le contenu de l'article est requis&nbsp;!</div>");
+                }
+                else if (data.status == 404) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Le fichier est trop volumineux, augmentez la limite de téléversement du serveur dans php.ini&nbsp;!</div>");
+                }
+                else if (data.status == 405) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Le fichier image n'est pas valide. Veuillez sélectionner une image valide&nbsp;!</div>");
+                }
+                else if (data.status == 406) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-warning'><i class='fa fa-exclamation-circle'></i> Identifiant de catégorie invalide. Veuillez vérifier vos informations&nbsp;!</div>");
+                }
+                else if (data.status == 500) {
+                    scrollToTop();
+                    message.html("<div class='alert alert-danger'><i class='fa fa-exclamation-circle'></i> Une erreur s'est produite, veuillez réessayer plus tard&nbsp;!</div>");
+                }
+            }
+        });
+    });
+});
+</script>

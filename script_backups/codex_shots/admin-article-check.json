@@ -1,0 +1,37 @@
+{
+  "loginState": {
+    "url": "https://www.chef-be.fr/",
+    "hasLoginForm": true,
+    "title": "Le grand chef",
+    "hasAdminLink": true
+  },
+  "createState": {
+    "url": "https://www.chef-be.fr/admin-cp/create-article",
+    "title": "Administration | Le grand chef",
+    "tinyMajorVersion": "5",
+    "iframeCount": 1,
+    "tinyCount": 1,
+    "hasMceContainer": true,
+    "hasToxEditor": true,
+    "textareaDisplay": "none",
+    "hasCreateForm": true,
+    "scrollCheck": {
+      "scrollTop": 552,
+      "scrollHeight": 1045,
+      "innerHeight": 493,
+      "reachedBottom": true
+    }
+  },
+  "articleState": {
+    "url": "https://www.chef-be.fr/articles/read/codex-test-article-1775684658203_11.html",
+    "title": "Codex test article 1775684658203 | Le grand chef",
+    "hasReadText": true,
+    "hasTable": true,
+    "hasBlockquote": true,
+    "hasPre": true
+  },
+  "screenshots": {
+    "create": "/var/www/vhosts/chef-be.fr/httpdocs/script_backups/codex_shots/admin-create-article-after.png",
+    "article": "/var/www/vhosts/chef-be.fr/httpdocs/script_backups/codex_shots/article-read-output-after.png"
+  }
+}

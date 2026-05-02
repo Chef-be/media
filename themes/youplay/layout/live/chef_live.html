@@ -1,0 +1,566 @@
+<script type="text/javascript">
+  window.PT_CHEF_LIVE_BROWSER_STUDIO = null;
+  window.PT_CHEF_LIVE_BROWSER_STREAM = '';
+  window.PT_CHEF_LIVE_BROWSER_LAST_DATA = null;
+  window.PT_CHEF_LIVE_BROWSER_PUBLISHER = null;
+  window.PT_CHEF_LIVE_BROWSER_LOCAL_STREAM = null;
+  window.PT_CHEF_LIVE_BROWSER_SCRIPT_PROMISE = null;
+  window.PT_CHEF_LIVE_BROWSER_SETTINGS_READY = false;
+  window.PT_CHEF_LIVE_BROWSER_SETTINGS_LOADING = false;
+
+  function PT_GetBrowserSettingsFields() {
+    return {
+      videoDevice: document.getElementById('browser_video_device'),
+      videoCodec: document.getElementById('browser_video_codec'),
+      videoBitrate: document.getElementById('browser_video_bitrate'),
+      videoFramerate: document.getElementById('browser_video_framerate'),
+      videoWidth: document.getElementById('browser_video_width'),
+      videoHeight: document.getElementById('browser_video_height'),
+      audioDevice: document.getElementById('browser_audio_device'),
+      audioCodec: document.getElementById('browser_audio_codec'),
+      audioBitrate: document.getElementById('browser_audio_bitrate'),
+      audioVoice: document.getElementById('browser_audio_voice'),
+      help: document.getElementById('live_browser_settings_help')
+    };
+  }
+
+  function PT_SetBrowserSettingsHelp(message) {
+    var fields = PT_GetBrowserSettingsFields();
+    if (fields.help) {
+      fields.help.textContent = message || '';
+    }
+  }
+
+  function PT_GetPreferredBrowserVideoCodec() {
+    var ua = (navigator.userAgent || '').toLowerCase();
+    if (ua.indexOf('firefox') > -1) {
+      return 'vp8/90000';
+    }
+    return 'h264/90000';
+  }
+
+  function PT_WithTimeout(promise, timeoutMs, label) {
+    return Promise.race([
+      promise,
+      new Promise(function (_resolve, reject) {
+        window.setTimeout(function () {
+          reject(new Error(label || 'timeout'));
+        }, timeoutMs);
+      })
+    ]);
+  }
+
+  function PT_AddBrowserOptionIfMissing(select, value, label) {
+    if (!select) {
+      return;
+    }
+    for (var i = 0; i < select.options.length; i += 1) {
+      if (select.options[i].value === value) {
+        return;
+      }
+    }
+    var option = document.createElement('option');
+    option.value = value;
+    option.text = label;
+    select.appendChild(option);
+  }
+
+  function PT_GetBrowserDeviceLabel(device, index) {
+    if (device.label) {
+      return device.label;
+    }
+    if (device.kind === 'videoinput') {
+      return 'camera ' + (index + 1);
+    }
+    if (device.kind === 'audioinput') {
+      return 'microphone ' + (index + 1);
+    }
+    return 'device ' + (index + 1);
+  }
+
+  function PT_PopulateBrowserDevices() {
+    var fields = PT_GetBrowserSettingsFields();
+    return navigator.mediaDevices.enumerateDevices().then(function (devices) {
+      var videoIndex = 0;
+      var audioIndex = 0;
+
+      for (var i = 0; i < devices.length; i += 1) {
+        var device = devices[i];
+        if (device.kind === 'videoinput') {
+          PT_AddBrowserOptionIfMissing(fields.videoDevice, device.deviceId, PT_GetBrowserDeviceLabel(device, videoIndex));
+          videoIndex += 1;
+        } else if (device.kind === 'audioinput') {
+          PT_AddBrowserOptionIfMissing(fields.audioDevice, device.deviceId, PT_GetBrowserDeviceLabel(device, audioIndex));
+          audioIndex += 1;
+        }
+      }
+
+      if (navigator.mediaDevices.getDisplayMedia !== undefined) {
+        PT_AddBrowserOptionIfMissing(fields.videoDevice, 'screen', 'screen');
+      }
+
+      if (fields.videoDevice && fields.videoDevice.options.length > 1 && fields.videoDevice.value === 'none') {
+        fields.videoDevice.selectedIndex = 1;
+      }
+      if (fields.audioDevice && fields.audioDevice.options.length > 1 && fields.audioDevice.value === 'none') {
+        fields.audioDevice.selectedIndex = 1;
+      }
+    });
+  }
+
+  function PT_PopulateBrowserCodecs() {
+    var fields = PT_GetBrowserSettingsFields();
+    var tempPC = new RTCPeerConnection({});
+    tempPC.addTransceiver('video', { direction: 'sendonly' });
+    tempPC.addTransceiver('audio', { direction: 'sendonly' });
+
+    return tempPC.createOffer().then(function (desc) {
+      var sdp = String(desc.sdp || '').toLowerCase();
+
+      ['av1/90000', 'vp9/90000', 'vp8/90000', 'h264/90000', 'h265/90000'].forEach(function (codec) {
+        if (sdp.indexOf(codec) > -1) {
+          PT_AddBrowserOptionIfMissing(fields.videoCodec, codec, codec.split('/')[0].toUpperCase());
+        }
+      });
+
+      ['opus/48000', 'g722/8000', 'pcmu/8000', 'pcma/8000'].forEach(function (codec) {
+        if (sdp.indexOf(codec) > -1) {
+          PT_AddBrowserOptionIfMissing(fields.audioCodec, codec, codec.split('/')[0].toUpperCase());
+        }
+      });
+      tempPC.close();
+    }).catch(function () {
+      PT_AddBrowserOptionIfMissing(fields.videoCodec, 'h264/90000', 'H264');
+      PT_AddBrowserOptionIfMissing(fields.videoCodec, 'vp8/90000', 'VP8');
+      PT_AddBrowserOptionIfMissing(fields.audioCodec, 'opus/48000', 'OPUS');
+      try {
+        tempPC.close();
+      } catch (_error) {}
+    });
+  }
+
+  function PT_InitBrowserSettingsForm() {
+    if (window.PT_CHEF_LIVE_BROWSER_SETTINGS_READY || window.PT_CHEF_LIVE_BROWSER_SETTINGS_LOADING) {
+      return;
+    }
+    window.PT_CHEF_LIVE_BROWSER_SETTINGS_LOADING = true;
+    PT_SetBrowserSettingsHelp('Détection des périphériques et codecs...');
+
+    Promise.allSettled([
+      PT_WithTimeout(PT_PopulateBrowserDevices(), 5000, 'device-enumeration-timeout'),
+      PT_WithTimeout(PT_PopulateBrowserCodecs(), 5000, 'codec-detection-timeout')
+    ]).finally(function () {
+      var fields = PT_GetBrowserSettingsFields();
+      var preferredVideoCodec = PT_GetPreferredBrowserVideoCodec();
+      if (fields.videoCodec && fields.videoCodec.options.length === 0) {
+        PT_AddBrowserOptionIfMissing(fields.videoCodec, 'h264/90000', 'H264');
+        PT_AddBrowserOptionIfMissing(fields.videoCodec, 'vp8/90000', 'VP8');
+      }
+      if (fields.audioCodec && fields.audioCodec.options.length === 0) {
+        PT_AddBrowserOptionIfMissing(fields.audioCodec, 'opus/48000', 'OPUS');
+      }
+      if (fields.videoCodec && fields.videoCodec.options.length > 0) {
+        var hasPreferredVideoCodec = false;
+        for (var i = 0; i < fields.videoCodec.options.length; i += 1) {
+          if (fields.videoCodec.options[i].value === preferredVideoCodec) {
+            hasPreferredVideoCodec = true;
+            break;
+          }
+        }
+        if (hasPreferredVideoCodec) {
+          fields.videoCodec.value = preferredVideoCodec;
+        } else if (!fields.videoCodec.value) {
+          fields.videoCodec.selectedIndex = 0;
+        }
+      }
+      if (fields.videoDevice && fields.videoDevice.options.length <= 1 && fields.audioDevice && fields.audioDevice.options.length <= 1) {
+        PT_SetBrowserSettingsHelp("Détection incomplète. Le navigateur tentera d'ouvrir la caméra et le micro par défaut au lancement.");
+      } else {
+        PT_SetBrowserSettingsHelp('');
+      }
+      window.PT_CHEF_LIVE_BROWSER_SETTINGS_READY = true;
+      window.PT_CHEF_LIVE_BROWSER_SETTINGS_LOADING = false;
+    });
+  }
+
+  function PT_GetBrowserStudioConfig() {
+    var fields = PT_GetBrowserSettingsFields();
+    return {
+      videoDevice: (fields.videoDevice ? fields.videoDevice.value : 'none'),
+      videoCodec: (fields.videoCodec ? fields.videoCodec.value : 'h264/90000'),
+      videoBitrate: (fields.videoBitrate ? fields.videoBitrate.value : '6000'),
+      videoFramerate: (fields.videoFramerate ? fields.videoFramerate.value : '30'),
+      videoWidth: (fields.videoWidth ? fields.videoWidth.value : '1280'),
+      videoHeight: (fields.videoHeight ? fields.videoHeight.value : '720'),
+      audioDevice: (fields.audioDevice ? fields.audioDevice.value : 'none'),
+      audioCodec: (fields.audioCodec ? fields.audioCodec.value : 'opus/48000'),
+      audioBitrate: (fields.audioBitrate ? fields.audioBitrate.value : '128'),
+      audioVoice: !!(fields.audioVoice && fields.audioVoice.checked)
+    };
+  }
+
+  function PT_RenderInlineBrowserPublishPanel(data) {
+    var panel = '' +
+      '<div class="alert alert-info chef-live-panel" style="margin-top:15px;">' +
+      '<strong>' + escapeHtml(data.provider_label || 'Chef Live Production') + '</strong><br>' +
+      'Le direct est piloté depuis cette page. La caméra et le micro vont être ouverts ci-dessous.' +
+      '</div>' +
+      '<div class="chef-live-inline-panel" style="margin-top:15px;">' +
+        '<video id="chef-live-inline-preview" autoplay muted playsinline style="width:100%;min-height:420px;border:0;border-radius:12px;background:#000;"></video>' +
+      '</div>' +
+      '<div class="alert alert-warning chef-live-panel" style="margin-top:15px;">' +
+        '<strong>Statut de diffusion</strong><br>' +
+        '<span class="chef-live-browser-status-text">Préparation du studio navigateur...</span>' +
+        '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">' +
+          '<button class="btn btn-main" type="button" onclick="PT_RetryBrowserStudio();">Relancer la diffusion</button>' +
+          '<button class="btn btn-default" type="button" onclick="PT_CloseBrowserStudioWindow();">Couper la caméra et le micro</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="chef-live-panel" style="margin-top:15px;">' +
+        '<strong>Flux de lecture</strong><br>' +
+        '<code style="display:block;margin-top:8px;">' + escapeHtml(data.webrtc_url || '') + '</code>' +
+        (data.playback_url ? ('<code style="display:block;margin-top:8px;">' + escapeHtml(data.playback_url || '') + '</code>') : '') +
+      '</div>';
+
+    $('.chef-live-panel, .chef-live-inline-panel').remove();
+    $('#main_live_video').html(panel);
+    $('#remote-media h3').addClass('hidden');
+  }
+
+  function PT_UpdateBrowserStudioStatus(state, details) {
+    var message = '';
+    if (state === 'initializing') {
+      message = 'Initialisation de la diffusion navigateur...';
+    } else if (state === 'media-opened') {
+      message = 'Caméra et micro ouverts. Publication en cours...';
+    } else if (state === 'publishing') {
+      message = 'Diffusion active depuis /live.';
+    } else if (state === 'stopped') {
+      message = 'Diffusion arrêtée.';
+    } else if (state === 'error') {
+      message = 'Erreur: ' + ((details && details.error) ? details.error : 'inconnue');
+    } else {
+      message = state || '';
+    }
+    $('.chef-live-browser-status-text').text(message);
+  }
+
+  function PT_ExplainBrowserMediaError(err) {
+    var name = (err && err.name) ? err.name : '';
+    if (name === 'AbortError') {
+      return "Démarrage caméra interrompu. Fermez les autres applications ou onglets qui utilisent la caméra, puis réessayez.";
+    }
+    if (name === 'NotReadableError') {
+      return "La caméra ou le micro est déjà utilisé par une autre application.";
+    }
+    if (name === 'NotAllowedError' || name === 'SecurityError') {
+      return "L'accès caméra/micro a été refusé par le navigateur.";
+    }
+    if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+      return "Aucune caméra ou aucun micro disponible n'a été trouvé.";
+    }
+    if (name === 'OverconstrainedError' || name === 'ConstraintNotSatisfiedError') {
+      return "Le navigateur n'a pas pu ouvrir le périphérique avec ces réglages.";
+    }
+    return (err && err.toString) ? err.toString() : 'Erreur inconnue';
+  }
+
+  function PT_BuildInlineBrowserMediaConstraints(config) {
+    var canProbeGenericVideo = $('#browser_video_device option').length <= 1;
+    var canProbeGenericAudio = $('#browser_audio_device option').length <= 1;
+    var videoId = config.videoDevice;
+    var audioId = config.audioDevice;
+
+    if (videoId === 'screen') {
+      return {
+        mode: 'screen',
+        constraints: {
+          video: {
+            width: { ideal: parseInt(config.videoWidth, 10) || 1280 },
+            height: { ideal: parseInt(config.videoHeight, 10) || 720 },
+            frameRate: { ideal: parseInt(config.videoFramerate, 10) || 30 },
+            cursor: 'always'
+          },
+          audio: audioId !== 'none'
+        }
+      };
+    }
+
+    var videoOpts = false;
+    if (videoId !== 'none') {
+      videoOpts = {
+        deviceId: videoId ? { ideal: videoId } : undefined,
+        width: { ideal: parseInt(config.videoWidth, 10) || 1280 },
+        height: { ideal: parseInt(config.videoHeight, 10) || 720 },
+        frameRate: { ideal: parseInt(config.videoFramerate, 10) || 30 }
+      };
+    } else if (canProbeGenericVideo) {
+      videoOpts = {
+        width: { ideal: parseInt(config.videoWidth, 10) || 1280 },
+        height: { ideal: parseInt(config.videoHeight, 10) || 720 },
+        frameRate: { ideal: parseInt(config.videoFramerate, 10) || 30 }
+      };
+    }
+
+    var audioOpts = false;
+    if (audioId !== 'none') {
+      audioOpts = {
+        deviceId: audioId ? { ideal: audioId } : undefined
+      };
+      if (!config.audioVoice) {
+        audioOpts.autoGainControl = false;
+        audioOpts.echoCancellation = false;
+        audioOpts.noiseSuppression = false;
+      }
+    } else if (canProbeGenericAudio) {
+      audioOpts = {};
+      if (!config.audioVoice) {
+        audioOpts.autoGainControl = false;
+        audioOpts.echoCancellation = false;
+        audioOpts.noiseSuppression = false;
+      }
+    }
+
+    return {
+      mode: 'camera',
+      constraints: {
+        video: videoOpts,
+        audio: audioOpts
+      }
+    };
+  }
+
+  function PT_RequestInlineBrowserMediaStream(built) {
+    return ((built.mode === 'screen')
+      ? navigator.mediaDevices.getDisplayMedia(built.constraints)
+      : navigator.mediaDevices.getUserMedia(built.constraints)
+    ).catch(function (err) {
+      var retryable = built.mode === 'camera' && err && (err.name === 'AbortError' || err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError');
+      if (!retryable) {
+        throw err;
+      }
+      return navigator.mediaDevices.getUserMedia({
+        video: built.constraints.video !== false,
+        audio: built.constraints.audio !== false
+      });
+    });
+  }
+
+  function PT_EnsureBrowserPublisherScript(scriptUrl) {
+    if (window.MediaMTXWebRTCPublisher) {
+      return Promise.resolve();
+    }
+    if (window.PT_CHEF_LIVE_BROWSER_SCRIPT_PROMISE) {
+      return window.PT_CHEF_LIVE_BROWSER_SCRIPT_PROMISE;
+    }
+    window.PT_CHEF_LIVE_BROWSER_SCRIPT_PROMISE = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = scriptUrl;
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = function () {
+        reject(new Error('Impossible de charger le script de publication WebRTC.'));
+      };
+      document.head.appendChild(script);
+    });
+    return window.PT_CHEF_LIVE_BROWSER_SCRIPT_PROMISE;
+  }
+
+  function PT_CloseBrowserStudioWindow() {
+    if (window.PT_CHEF_LIVE_BROWSER_PUBLISHER) {
+      try {
+        window.PT_CHEF_LIVE_BROWSER_PUBLISHER.close();
+      } catch (_error) {}
+    }
+    window.PT_CHEF_LIVE_BROWSER_PUBLISHER = null;
+
+    if (window.PT_CHEF_LIVE_BROWSER_LOCAL_STREAM) {
+      try {
+        var tracks = window.PT_CHEF_LIVE_BROWSER_LOCAL_STREAM.getTracks();
+        for (var i = 0; i < tracks.length; i += 1) {
+          tracks[i].stop();
+        }
+      } catch (_error) {}
+    }
+    window.PT_CHEF_LIVE_BROWSER_LOCAL_STREAM = null;
+
+    var preview = document.getElementById('chef-live-inline-preview');
+    if (preview) {
+      preview.srcObject = null;
+    }
+    PT_UpdateBrowserStudioStatus('stopped');
+  }
+
+  function PT_StartInlineBrowserStudio(data) {
+    var config = PT_GetBrowserStudioConfig();
+    window.PT_CHEF_LIVE_BROWSER_LAST_DATA = data;
+    window.PT_CHEF_LIVE_BROWSER_STREAM = data.stream_name || '';
+    PT_RenderInlineBrowserPublishPanel(data);
+    PT_UpdateBrowserStudioStatus('initializing');
+    PT_CloseBrowserStudioWindow();
+
+    PT_EnsureBrowserPublisherScript(data.browser_publisher_js_url || '').then(function () {
+      var built = PT_BuildInlineBrowserMediaConstraints(config);
+      if (built.mode !== 'screen' && built.constraints.video === false && built.constraints.audio === false) {
+        throw new Error('Sélectionnez au moins une caméra ou un micro.');
+      }
+      return PT_RequestInlineBrowserMediaStream(built).then(function (stream) {
+        var preview = document.getElementById('chef-live-inline-preview');
+        window.PT_CHEF_LIVE_BROWSER_LOCAL_STREAM = stream;
+        if (preview) {
+          preview.srcObject = stream;
+        }
+        PT_UpdateBrowserStudioStatus('media-opened');
+        try {
+          if (typeof window.MediaMTXWebRTCPublisher !== 'function') {
+            throw new Error("Le module de publication WebRTC n'est pas disponible.");
+          }
+          window.PT_CHEF_LIVE_BROWSER_PUBLISHER = new MediaMTXWebRTCPublisher({
+            url: data.browser_whip_url,
+            stream: stream,
+            videoCodec: config.videoCodec || 'h264/90000',
+            videoBitrate: config.videoBitrate || '6000',
+            audioCodec: config.audioCodec || 'opus/48000',
+            audioBitrate: config.audioBitrate || '128',
+            audioVoice: !!config.audioVoice,
+            onError: function (err) {
+              PT_CloseBrowserStudioWindow();
+              PT_UpdateBrowserStudioStatus('error', { error: String(err || '') });
+            },
+            onConnected: function () {
+              PT_UpdateBrowserStudioStatus('publishing');
+            }
+          });
+        } catch (err) {
+          PT_CloseBrowserStudioWindow();
+          PT_UpdateBrowserStudioStatus('error', { error: PT_ExplainBrowserMediaError(err) });
+        }
+      });
+    }).catch(function (err) {
+      PT_CloseBrowserStudioWindow();
+      PT_UpdateBrowserStudioStatus('error', { error: PT_ExplainBrowserMediaError(err) });
+    });
+  }
+
+  function PT_RetryBrowserStudio() {
+    if (window.PT_CHEF_LIVE_BROWSER_LAST_DATA) {
+      PT_StartInlineBrowserStudio(window.PT_CHEF_LIVE_BROWSER_LAST_DATA);
+    }
+  }
+
+  function PT_StartBrowserServerBroadcast() {
+    var target = (window.PT_GetSelectedLiveTarget ? window.PT_GetSelectedLiveTarget() : null);
+    var activeContext = window.PT_ACTIVE_LIVE_CONTEXT;
+    if (!target) {
+      return;
+    }
+    if (activeContext && activeContext.post_id) {
+      $('#live_post_id').val(activeContext.post_id);
+      $('.end_vdo_call').removeClass('hidden');
+      $('#liveSetupModal').modal('hide');
+      PT_StartInlineBrowserStudio(activeContext);
+      return;
+    }
+    var video_name = $('#live_video_name').val();
+    $('#publishBtn').attr('disabled', true).text('Veuillez patienter...');
+    $.post("{{LINK aj/live/create}}", {
+      video_name: video_name,
+      provider: target.provider,
+      server_id: target.server_id,
+      stream_mode: 'browser'
+    }, function(data) {
+      if (data.status == 200) {
+        $('#live_post_id').val(data.post_id);
+        $('.end_vdo_call').removeClass('hidden');
+        $('#publishBtn').addClass('hidden');
+        $('#liveSetupModal').modal('hide');
+        PT_StartInlineBrowserStudio(data);
+      } else {
+        $('#publishBtn').removeAttr('disabled').text('Créer le direct');
+      }
+    });
+  }
+
+  function PT_EncoderStudioReady() {
+    var target = (window.PT_GetSelectedLiveTarget ? window.PT_GetSelectedLiveTarget() : null);
+    var title = target && target.name ? target.name : 'Serveur de streaming';
+    $('#remote-media h3').removeClass('hidden').html('Créez votre direct, puis diffusez avec OBS, vMix, Streamlabs ou une autre application vers ' + title + '.');
+    $('.wow_go_live_btn').removeClass('hidden');
+    $('#publishBtn').text('Créer le direct');
+    $('#live_setup_intro').text('Le live sera créé maintenant. Les flux et la clé de diffusion apparaîtront dans cette fenêtre pour votre logiciel.');
+    $('#live_encoder_panel').show();
+    $('#publishBtn').off('click').on('click', function () {
+      PT_StartEncoderBroadcast();
+    });
+  }
+
+  function PT_StartEncoderBroadcast() {
+    var target = (window.PT_GetSelectedLiveTarget ? window.PT_GetSelectedLiveTarget() : null);
+    if (!target) {
+      return;
+    }
+    var video_name = $('#live_video_name').val();
+    $('#publishBtn').attr('disabled', true).text('Veuillez patienter...');
+    $.post("{{LINK aj/live/create}}", {
+      video_name: video_name,
+      provider: target.provider,
+      server_id: target.server_id,
+      stream_mode: 'encoder'
+    }, function(data) {
+      if (data.status == 200) {
+        $('#live_post_id').val(data.post_id);
+        $('.end_vdo_call').removeClass('hidden');
+        $('#publishBtn').addClass('hidden');
+        PT_RenderEncoderPanel(data);
+      } else {
+        $('#publishBtn').removeAttr('disabled').text('Créer le direct');
+      }
+    });
+  }
+
+  function PT_RenderEncoderPanel(data) {
+    var panel = '' +
+      '<div class="live-setup-credentials-title">Informations de diffusion</div>' +
+      '<div class="alert alert-info chef-live-panel" style="margin-top:15px;">' +
+      '<strong>' + escapeHtml(data.provider_label || 'Serveur de diffusion') + '</strong><br>' +
+      '<div style="margin-top:12px;"><strong>URL RTMP</strong><br><code>' + escapeHtml(data.publish_url || '') + '</code></div>' +
+      '<div style="margin-top:12px;"><strong>Clé de stream</strong><br><code>' + escapeHtml(data.stream_key || '') + '</code></div>' +
+      (data.playback_url ? ('<div style="margin-top:12px;"><strong>Flux HLS</strong><br><code>' + escapeHtml(data.playback_url || '') + '</code></div>') : '') +
+      (data.webrtc_url ? ('<div style="margin-top:12px;"><strong>Flux WebRTC</strong><br><code>' + escapeHtml(data.webrtc_url || '') + '</code></div>') : '') +
+      '<div style="margin-top:12px;"><small>Configurez votre encodeur avec ces informations, puis ouvrez la page de lecture pour vérifier le flux.</small></div>' +
+      '</div>';
+    $('#live_setup_intro').text('Le live a été créé. Utilisez maintenant ces informations dans votre logiciel de diffusion.');
+    $('#live_stream_credentials').html(panel);
+    $('#live_encoder_panel').show();
+    $('#liveSetupModal').modal('show');
+    setTimeout(function () {
+      var credentials = document.getElementById('live_stream_credentials');
+      if (credentials) {
+        credentials.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      var modalBody = document.querySelector('#liveSetupModal .modal-body');
+      if (modalBody) {
+        modalBody.scrollTop = modalBody.scrollHeight;
+      }
+    }, 60);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  window.PT_LiveEncoderReady = PT_EncoderStudioReady;
+  window.PT_StartEncoderBroadcast = PT_StartEncoderBroadcast;
+  window.PT_RenderEncoderPanel = PT_RenderEncoderPanel;
+  window.PT_StartBrowserServerBroadcast = PT_StartBrowserServerBroadcast;
+  window.PT_StartInlineBrowserStudio = PT_StartInlineBrowserStudio;
+  window.PT_CloseBrowserStudioWindow = PT_CloseBrowserStudioWindow;
+  window.PT_UpdateBrowserStudioStatus = PT_UpdateBrowserStudioStatus;
+  window.PT_RetryBrowserStudio = PT_RetryBrowserStudio;
+  window.PT_InitBrowserSettingsForm = PT_InitBrowserSettingsForm;
+</script>

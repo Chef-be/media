@@ -1,0 +1,164 @@
+.tox-tinymce {
+    border: 1px solid #dbe4ee !important;
+    border-radius: 14px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.tox-tinymce .tox-editor-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.tox .tox-toolbar-overlord,
+.tox .tox-toolbar__primary {
+    flex-wrap: wrap !important;
+}
+
+.tox .tox-toolbar__group {
+    flex-wrap: wrap !important;
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow,
+.tox .tox-edit-area__iframe,
+.tox .tox-statusbar {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow {
+    background: #f8fbff !important;
+    border-bottom: 1px solid #e3ebf5 !important;
+    padding: 6px !important;
+}
+
+.tox .tox-statusbar {
+    background: #f8fbff !important;
+    border-top: 1px solid #e3ebf5 !important;
+}
+
+.tox .tox-edit-area::before {
+    border: 0 !important;
+}
+
+.tox:not(.tox-tinymce-inline) .tox-editor-header {
+    box-shadow: none !important;
+}
+
+.tox .tox-tbtn,
+.tox .tox-mbtn,
+.tox .tox-tbtn.tox-tbtn--select,
+.tox .tox-statusbar__path-item,
+.tox .tox-statusbar__wordcount,
+.tox .tox-statusbar__branding a {
+    color: #334155 !important;
+}
+
+.tox .tox-toolbar__group:not(:last-of-type) {
+    border-right: 0 !important;
+    margin-right: 4px !important;
+    padding-right: 4px !important;
+}
+
+.tox .tox-tbtn[title*="Alt+"],
+.tox .tox-tbtn[aria-label*="Alt+"],
+.tox .tox-tbtn[title*="Titre 2"],
+.tox .tox-tbtn[title*="Titre 3"] {
+    font-weight: 700 !important;
+}
+
+.tox .tox-tbtn:hover,
+.tox .tox-mbtn:hover,
+.tox .tox-tbtn--enabled,
+.tox .tox-tbtn--enabled:hover,
+.tox .tox-mbtn:hover:not(:disabled):not(.tox-mbtn--active) {
+    background: #e2efff !important;
+    color: #0f172a !important;
+}
+
+.tox .tox-tbtn svg,
+.tox .tox-mbtn svg {
+    fill: currentColor !important;
+}
+
+.tox .tox-edit-area__iframe {
+    background: transparent !important;
+}
+
+body.dark .tox-tinymce {
+    border-color: #334155 !important;
+    box-shadow: 0 14px 36px rgba(2, 6, 23, 0.45);
+}
+
+body.dark .tox .tox-toolbar,
+body.dark .tox .tox-toolbar__primary,
+body.dark .tox .tox-toolbar__overflow {
+    background: #0f172a !important;
+    border-bottom-color: #334155 !important;
+}
+
+body.dark .tox .tox-editor-header,
+body.dark .tox .tox-statusbar {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark .tox .tox-tbtn,
+body.dark .tox .tox-mbtn,
+body.dark .tox .tox-tbtn.tox-tbtn--select,
+body.dark .tox .tox-statusbar,
+body.dark .tox .tox-statusbar__path-item,
+body.dark .tox .tox-statusbar__wordcount,
+body.dark .tox .tox-statusbar__branding a,
+body.dark .tox .tox-collection__item-label,
+body.dark .tox .tox-mbtn__select-label {
+    color: #dbe7f3 !important;
+}
+
+body.dark .tox .tox-tbtn svg,
+body.dark .tox .tox-mbtn svg {
+    fill: currentColor !important;
+}
+
+body.dark .tox .tox-tbtn:hover,
+body.dark .tox .tox-mbtn:hover,
+body.dark .tox .tox-tbtn--enabled,
+body.dark .tox .tox-tbtn--enabled:hover,
+body.dark .tox .tox-mbtn:hover:not(:disabled):not(.tox-mbtn--active) {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+body.dark .tox .tox-collection--list,
+body.dark .tox .tox-menu,
+body.dark .tox .tox-dialog,
+body.dark .tox .tox-dialog__header,
+body.dark .tox .tox-dialog__body,
+body.dark .tox .tox-dialog__footer,
+body.dark .tox .tox-collection__group {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark .tox .tox-collection__item--active,
+body.dark .tox .tox-collection__item--enabled:hover,
+body.dark .tox .tox-collection__item--enabled:focus {
+    background: #1e293b !important;
+}
+
+body.dark .tox .tox-textfield,
+body.dark .tox .tox-textarea,
+body.dark .tox .tox-selectfield select {
+    background: #020617 !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark .tox .tox-toolbar__group:not(:last-of-type) {
+    border-right-color: transparent !important;
+}

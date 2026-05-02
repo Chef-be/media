@@ -1,0 +1,944 @@
+<?php
+$pt->config->ffmpeg  = is_executable($pt->config->ffmpeg_binary_file);
+function isEnabled($func) {
+    return is_callable($func) && false === stripos(ini_get('disable_functions'), $func);
+}
+$enabled = true;
+if (!isEnabled('shell_exec')) {
+    $enabled = false;
+}
+
+
+?>
+
+<div class="container-fluid">
+    <div>
+        <h3>Configuration générale</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Panneau d'administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Configuration générale</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <?php $getStatus = getStatus(); if (!empty($getStatus) && !empty(checkIfThereIsError($getStatus))) {?><div class="alert alert-danger"><strong>Important !</strong> Il y a des erreurs détectées sur votre système, veuillez les examiner <a href="<?php echo PT_LoadAdminLinkSettings('system_status'); ?>" data-ajax="?path=system_status">État du système</a>.</div><?php }?>
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Configuration générale</h6>
+                    <div class="video-settings-alert"></div>
+                    <form class="video-settings" method="POST">
+                        <div class="float-left">
+                            <label for="switch_account" class="main-label">Changer de compte</label>
+                            <br><small class="admin-info">Permettre aux utilisateurs de changer de compte.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="switch_account" value="off" />
+                            <input type="checkbox" name="switch_account" id="chck-switch_account" value="on" <?php echo ($pt->config->switch_account == 'on') ? 'checked': '';?>>
+                            <label for="chck-switch_account" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nombre de changements de compte</label>
+                                <input type="text" name="switch_account_counts" class="form-control" value="<?php echo ($pt->config->switch_account_counts);?>">
+                                <small class="admin-info">Nombre de changements de compte</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="developer_mode" class="main-label">Mode développeur</label>
+                            <br><small class="admin-info">Activez le rapport d'erreurs pour que le développeur puisse voir les erreurs.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="developer_mode" value="off" />
+                            <input type="checkbox" name="developer_mode" id="chck-developer_mode" value="on" <?php echo ($pt->config->developer_mode == 'on') ? 'checked': '';?>>
+                            <label for="chck-developer_mode" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="developers_page" class="main-label">Développeurs (Système API)</label>
+                            <br><small class="admin-info">Afficher la page /developers à tous les utilisateurs pour les requêtes API.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="developers_page" value="off" />
+                            <input type="checkbox" name="developers_page" id="chck-developers_page" value="on" <?php echo ($pt->config->developers_page == 'on') ? 'checked': '';?>>
+                            <label for="chck-developers_page" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+                      <div class="float-left">
+                        <label for="maintenance_mode" class="main-label">Mode de maintenance.</label>
+                        <br><small class="admin-info">Mettre l'ensemble du site en mode maintenance. <br>
+Vous pouvez rétablir le site en visitant <a href="<?php echo $pt->config->site_url;?>/login?access=admin" style="color:red" target="_blank"><?php echo $pt->config->site_url;?>/login?access=admin</a></small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="maintenance_mode" value="off" />
+                        <input type="checkbox" name="maintenance_mode" id="chck-maintenance_mode" value="on" <?php echo ($pt->config->maintenance_mode == 'on') ? 'checked': '';?>>
+                        <label for="chck-maintenance_mode" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr>
+
+                          <div class="float-left">
+                            <label for="seo_link" class="main-label">Liens SEO</label>
+                            <br><small class="admin-info">Activer les liens SEO, par exemple : chef-be.fr/cette-video-_ID.html, cela améliorera le classement sur Google.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="seo_link" value="off" />
+                            <input type="checkbox" name="seo_link" id="chck-seo_link" value="on" <?php echo ($pt->config->seo_link == 'on') ? 'checked': '';?>>
+                            <label for="chck-seo_link" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="history_system" class="main-label">Système historique vidéos</label>
+                            <br><small class="admin-info">Les utilisateurs pourront consulter les vidéos qu'ils ont regardées.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="history_system" value="off" />
+                            <input type="checkbox" name="history_system" id="chck-history_system" value="on" <?php echo ($pt->config->history_system == 'on') ? 'checked': '';?>>
+                            <label for="chck-history_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+
+
+
+                        <div class="float-left">
+                            <label for="popular_channels" class="main-label">Chaînes populaires</label>
+                            <br><small class="admin-info">Afficher les chaînes populaires classées par le plus grand nombre d'abonnés.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="popular_channels" value="off" />
+                            <input type="checkbox" name="popular_channels" id="chck-popular_channels" value="on" <?php echo ($pt->config->popular_channels == 'on') ? 'checked': '';?>>
+                            <label for="chck-popular_channels" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+                        <div class="float-left">
+                            <label for="article_system" class="main-label">Système d'articles</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_article" id="who_can_article-admin" onchange="SelectProModel('can_use_article',this)" value="admin" <?php echo ($pt->config->who_can_article == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_article-admin" data-toggle="tooltip" data-placement="bottom" title="Admin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_article" id="who_can_article-all" onchange="SelectProModel('can_use_article',this)" value="all" <?php echo ($pt->config->who_can_article == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_article-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_article" id="who_can_article-pro" onchange="SelectProModel('can_use_article',this)" value="pro" <?php echo ($pt->config->who_can_article == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_article-pro" data-toggle="tooltip" data-placement="bottom" title="Seulement les utilisateurs Pro"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Créer des articles dans la section blog.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="article_system" value="off" />
+                            <input type="checkbox" name="article_system" id="chck-article_system" value="on" <?php echo ($pt->config->article_system == 'on') ? 'checked': '';?>>
+                            <label for="chck-article_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="show_articles" class="main-label">Afficher les articles sur la page d'accueil</label>
+                            <br><small class="admin-info">Les articles seront visibles sur la page d'accueil.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="show_articles" value="off" />
+                            <input type="checkbox" name="show_articles" id="chck-show_articles" value="on" <?php echo ($pt->config->show_articles == 'on') ? 'checked': '';?>>
+                            <label for="chck-show_articles" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+
+                        <div class="float-left">
+                            <label for="pop_up_18" class="main-label">Fenêtre contextuelle +18</label>
+                            <br><small class="admin-info">Afficher une fenêtre contextuelle +18 lorsque l'utilisateur accède au site.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="pop_up_18" value="off" />
+                            <input type="checkbox" name="pop_up_18" id="chck-pop_up_18" value="on" <?php echo ($pt->config->pop_up_18 == 'on') ? 'checked': '';?>>
+                            <label for="chck-pop_up_18" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Temps de blocage +18</label>
+                                <input type="text" name="time_18" class="form-control" value="{{CONFIG time_18}}" oninput="this.value = this.value.replace(/[^1-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                <small class="admin-info">Définir le nombre d'heures pour bloquer un utilisateur qui n'a pas plus de 18 ans.</small>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="float-left">
+                            <label for="lang_modal" class="main-label">Sélection de la langue</label>
+                            <br><small class="admin-info">Afficher la fenêtre de sélection de langue lorsque l'utilisateur accède au site.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="lang_modal" value="off" />
+                            <input type="checkbox" name="lang_modal" id="chck-lang_modal" value="on" <?php echo ($pt->config->lang_modal == 'on') ? 'checked': '';?>>
+                            <label for="chck-lang_modal" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <label for="language">Langue par défaut</label>
+                        <br><small class="admin-info">Choisir la langue par défaut du site.</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="language" name="language">
+                              <option value="">-- Veuillez sélectionner --</option>
+                            <?php
+                            $langs__footer = $pt->langs;
+                            $langs_html    = '';
+                            foreach ($langs__footer as $key => $language) {
+                                $lang_explode = explode('.', $language);
+                                $language     = $lang_explode[0];
+                                $language_    = ucfirst($language);
+                                $selected = ($pt->config->language == $language) ? 'selected': '';
+                                $langs_html .= '<option value="' . $language . '" ' . $selected . '>' . $language_ . '</option>';
+                            }
+                            echo $langs_html;
+                            ?>
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="report_copyright" class="main-label">Signaler une atteinte aux droits d'auteur</label>
+                            <br><small class="admin-info">Permettre aux utilisateurs de soumettre des demandes de retrait pour atteinte aux droits d'auteur.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="report_copyright" value="off" />
+                            <input type="checkbox" name="report_copyright" id="chck-report_copyright" value="on" <?php echo ($pt->config->report_copyright == 'on') ? 'checked': '';?>>
+                            <label for="chck-report_copyright" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+
+                        <div class="float-left">
+                            <label for="playlist_subscribe" class="main-label">Abonnement aux listes de lecture.</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_playlist" id="who_can_playlist-admin" onchange="SelectProModel('can_use_playlist',this)" value="admin" <?php echo ($pt->config->who_can_playlist == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_playlist-admin" data-toggle="tooltip" data-placement="bottom" title="Admin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_playlist" id="who_can_playlist-all" onchange="SelectProModel('can_use_playlist',this)" value="all" <?php echo ($pt->config->who_can_playlist == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_playlist-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_playlist" id="who_can_playlist-pro" onchange="SelectProModel('can_use_playlist',this)" value="pro" <?php echo ($pt->config->who_can_playlist == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_playlist-pro" data-toggle="tooltip" data-placement="bottom" title="Seulement les utilisateurs Pro"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Permettre aux utilisateurs de s'abonner aux playlists.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="playlist_subscribe" value="off" />
+                            <input type="checkbox" name="playlist_subscribe" id="chck-playlist_subscribe" value="on" <?php echo ($pt->config->playlist_subscribe == 'on') ? 'checked': '';?>>
+                            <label for="chck-playlist_subscribe" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+                        <div class="float-left">
+                            <label for="post_system" class="main-label">Système de création de publications</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut accéder à cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_post" id="who_can_post-admin" onchange="SelectProModel('can_use_post',this)" value="admin" <?php echo ($pt->config->who_can_post == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_post-admin" data-toggle="tooltip" data-placement="bottom" title="Admin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_post" id="who_can_post-all" onchange="SelectProModel('can_use_post',this)" value="all" <?php echo ($pt->config->who_can_post == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_post-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_post" id="who_can_post-pro" onchange="SelectProModel('can_use_post',this)" value="pro" <?php echo ($pt->config->who_can_post == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_post-pro" data-toggle="tooltip" data-placement="bottom" title="Seulement les utilisateurs Pro"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Permettre aux utilisateurs de créer des publications sur la page de la chaîne.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="post_system" value="off" />
+                            <input type="checkbox" name="post_system" id="chck-post_system" value="on" <?php echo ($pt->config->post_system == 'on') ? 'checked': '';?>>
+                            <label for="chck-post_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group">
+                            <style type="text/css">
+                                div .show-menu-arrow .open{overflow: unset !important;}
+                            </style>
+                            <label class="" for="geo_blocking">{{LANG fav_category}}</label>
+                            <div class="">
+                                <div class="form-group-rs" id="geo_blocking">
+                                <select class="form-control js-example-basic-single" id="multi_select_info" multiple name="fav_category[]" data-live-search="true" title="{{LANG fav_category}}" data-actions-box="true">
+                                    <?php
+                                    foreach ($pt->categories as $key => $name):
+                                    if($key != 'other'){
+                                        ?>
+                                        <option value="<?php echo($key); ?>" <?php if (in_array($key, $pt->config->fav_category)) {echo "selected";} ?>>
+                                            <span>
+                                                <?php echo($name); ?>
+                                            </span>
+                                        </option>
+                                    <?php } ?>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="help-block" style="">{{LANG choose_which_categories}}</small>
+                                <div class="clear"></div>
+                                </div>
+                            </div>
+                        </div>
+                          <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Limite de pagination des vidéos</label>
+                                <input type="number" name="videos_load_limit" class="form-control" value="<?php echo ($pt->config->videos_load_limit);?>" min="2" max="10000">
+                                <small class="admin-info">Choisissez la limite du nombre de vidéos à afficher sur chaque page.</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Mots censurés</label>
+                                <input type="text" name="censored_words" class="form-control" value="<?php echo ($pt->config->censored_words);?>">
+                                <small class="admin-info">Définissez les mots censurés, séparés par une virgule (,)</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <label for="date_style" class="main-label">Format de date</label>
+                        <br><small class="admin-info">Définissez le format de date par défaut de votre site.</small>
+                        <select class="form-control show-tick" id="date_style" name="date_style">
+                          <option value="m/d/y" <?php if($pt->config->date_style == 'm/d/y'){echo 'selected';};?> >mm/dd/yy</option>
+                          <option value="d/m/y" <?php if($pt->config->date_style == 'd/m/y'){echo 'selected';};?> >dd/mm/yy</option>
+                          <option value="y/m/d" <?php if($pt->config->date_style == 'y/m/d'){echo 'selected';};?> >yy/mm/dd</option>
+                          <option value="M/d/y" <?php if($pt->config->date_style == 'M/d/y'){echo 'selected';};?> >mmm/dd/yy</option>      
+                          <option value="d/F/y" <?php if($pt->config->date_style == 'd/F/y'){echo 'selected';};?> >dd/mmmm/yy</option>
+                          <option value="Y/m/d" <?php if($pt->config->date_style == 'Y/m/d'){echo 'selected';};?> >yyyy/mm/dd</option> 
+                          <option value="d-F-Y" <?php if($pt->config->date_style == 'd-F-Y'){echo 'selected';};?> >dd mmmm yyyy</option>
+                        </select>
+                        <br>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Connexion et inscription</h6>
+                    <div class="user-settings-alert"></div>
+                    <form class="user-settings" method="POST">
+                        <div class="float-left">
+                            <label for="user_registration" class="main-label">Inscription de l'utilisateur</label>
+                            <br><small class="admin-info">Permettre aux utilisateurs de créer des comptes sur votre site.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="user_registration" value="off" />
+                            <input type="checkbox" name="user_registration" id="chck-user_registration" value="on" <?php echo ($pt->config->user_registration == 'on') ? 'checked': '';?>>
+                            <label for="chck-user_registration" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="validation" class="main-label">Validation du compte</label>
+                            <br><small class="admin-info">Envoyer un lien d'activation après l'enregistrement.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="validation" value="off" />
+                            <input type="checkbox" name="validation" id="chck-validation" value="on" <?php echo ($pt->config->validation == 'on') ? 'checked': '';?>>
+                            <label for="chck-validation" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="auto_username" class="main-label">Nom d'utilisateur automatique lors de l'inscription</label>
+                            <br><small class="admin-info">Générer un nom d'utilisateur automatique lors de l'inscription. <br> Le formulaire d'inscription demandera le nom et le prénom de l'utilisateur.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="auto_username" value="off"/>
+                            <input type="checkbox" name="auto_username" id="chck-auto_username" value="on" <?php echo ($pt->config->auto_username == 'on') ? 'checked': '';?>>
+                            <label for="chck-auto_username" class="check-trail"><span class="check-handler"></span></label>
+                        </div> 
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="two_factor_setting" class="main-label">Paramètres à deux facteurs</label>
+                            <br><small class="admin-info">Envoi d'un code de confirmation par e-mail ou SMS lorsque l'utilisateur se connecte.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="two_factor_setting" value="off" />
+                            <input type="checkbox" name="two_factor_setting" id="chck-two_factor_setting" value="on" <?php echo ($pt->config->two_factor_setting == 'on') ? 'checked': '';?>>
+                            <label for="chck-two_factor_setting" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="google_authenticator" class="main-label">Paramètres de Google Authenticator</label>
+                            <br><small class="admin-info">Code Google Authenticator lors de la connexion de l'utilisateur.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="google_authenticator" value="off" />
+                            <input type="checkbox" name="google_authenticator" id="chck-google_authenticator" value="on" <?php echo ($pt->config->google_authenticator == 'on') ? 'checked': '';?>>
+                            <label for="chck-google_authenticator" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="authy_settings" class="main-label">Paramètres Authy</label>
+                            <br><small class="admin-info">Code Authy lors de la connexion de l'utilisateur.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="authy_settings" value="off" />
+                            <input type="checkbox" name="authy_settings" id="chck-authy_settings" value="on" <?php echo ($pt->config->authy_settings == 'on') ? 'checked': '';?>>
+                            <label for="chck-authy_settings" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Token Authy</label>
+                                <input type="text" id="authy_token" name="authy_token" class="form-control" value="<?php echo $pt->config->authy_token?>">
+                                <small class="admin-info">Token Authy de votre compte twilio</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="password_complexity_system" class="main-label">Système de complexité des mots de passe</label>
+                            <br><small class="admin-info">Le système demandera un mot de passe puissant lors de l'inscription, <br>y compris les lettres, les chiffres et les caractères spéciaux.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="password_complexity_system" value="0" />
+                            <input type="checkbox" name="password_complexity_system" id="chck-password_complexity_system" value="1" <?php echo ($pt->config->password_complexity_system == 1) ? 'checked': '';?>>
+                            <label for="chck-password_complexity_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="remember_device" class="main-label">Se souvenir de cet appareil</label>
+                            <br><small class="admin-info">Se souvenir de cet appareil dans la page d'accueil.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="remember_device" value="0" />
+                            <input type="checkbox" name="remember_device" id="chck-remember_device" value="1" <?php echo ($pt->config->remember_device == 1) ? 'checked': '';?>>
+                            <label for="chck-remember_device" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="recaptcha" class="main-label">Recaptcha</label>
+                            <br><small class="admin-info">Activer reCaptcha pour éviter le spam.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="recaptcha" value="off" />
+                            <input type="checkbox" name="recaptcha" id="chck-recaptcha" value="on" <?php echo ($pt->config->recaptcha == 'on') ? 'checked': '';?>>
+                            <label for="chck-recaptcha" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Clé Recaptcha</label>
+                                <input type="text" name="recaptcha_key" class="form-control" value="<?php echo ($pt->config->recaptcha_key);?>">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="reCaptcha" class="main-label">Empêcher les mauvaises tentatives de connexion</label>
+                            <br><small class="admin-info">Activez cette fonction pour suivre et arrêter les attaques par force brute.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="prevent_system" value="0" />
+                            <input type="checkbox" name="prevent_system" id="chck-prevent_system" value="1" <?php echo ($pt->config->prevent_system == 1) ? 'checked': '';?>>
+                            <label for="chck-prevent_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Limite de connexion</label>
+                                <input type="text" id="bad_login_limit" name="bad_login_limit" class="form-control" value="<?php echo $pt->config->bad_login_limit?>">
+                                <small class="admin-info">Combien de fois un utilisateur peut-il essayer de se connecter avant d'être bloqué ?</small>
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Temps de verrouillage (en minutes)</label>
+                                <input type="text" id="lock_time" name="lock_time" class="form-control" value="<?php echo $pt->config->lock_time?>">
+                                <small class="admin-info">Pendant combien de temps l'utilisateur doit-il rester bloqué ?</small>
+                            </div>
+                        </div>
+                        <hr>
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Configuration de l'utilisateur</h6>
+                    <div class="api-settings-alert"></div>
+                    <form class="api-settings" method="POST">
+                        <div class="float-left">
+                            <label for="delete_account" class="main-label">Supprimer le compte d'utilisateur</label>
+                            <br><small class="admin-info">Permettre aux utilisateurs de supprimer leur compte.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="delete_account" value="off" />
+                            <input type="checkbox" name="delete_account" id="chck-delete_account" value="on" <?php echo ($pt->config->delete_account == 'on') ? 'checked': '';?>>
+                            <label for="chck-delete_account" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="verification_badge" class="main-label">Badge de vérification de l'utilisateur</label>
+                            <br><small class="admin-info">Ajout d'un badge de vérification aux utilisateurs</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="verification_badge" value="off" />
+                            <input type="checkbox" name="verification_badge" id="chck-verification_badge" value="on" <?php echo ($pt->config->verification_badge == 'on') ? 'checked': '';?>>
+                            <label for="chck-verification_badge" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                         <div class="float-left">
+                            <label for="block_system" class="main-label">Système de blocage des utilisateurs</label>
+                            <br><small class="admin-info">Permettre aux utilisateurs de se bloquer mutuellement.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="block_system" value="off" />
+                            <input type="checkbox" name="block_system" id="chck-block_system" value="on" <?php echo ($pt->config->block_system == 'on') ? 'checked': '';?>>
+                            <label for="chck-block_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="payed_subscribers" class="main-label">Payer pour s'abonner</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_payed_subscribers" id="who_can_payed_subscribers-admin" onchange="SelectProModel('can_use_payed_subscribers',this)" value="admin" <?php echo ($pt->config->who_can_payed_subscribers == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_payed_subscribers-admin" data-toggle="tooltip" data-placement="bottom" title="Admin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_payed_subscribers" id="who_can_payed_subscribers-all" onchange="SelectProModel('can_use_payed_subscribers',this)" value="all" <?php echo ($pt->config->who_can_payed_subscribers == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_payed_subscribers-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_payed_subscribers" id="who_can_payed_subscribers-pro" onchange="SelectProModel('can_use_payed_subscribers',this)" value="pro" <?php echo ($pt->config->who_can_payed_subscribers == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_payed_subscribers-pro" data-toggle="tooltip" data-placement="bottom" title="Utilisateurs pro uniquement"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Les utilisateurs devraient payer pour s'abonner à une chaîne.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="payed_subscribers" value="off" />
+                            <input type="checkbox" name="payed_subscribers" id="chck-payed_subscribers" value="on" <?php echo ($pt->config->payed_subscribers == 'on') ? 'checked': '';?>>
+                            <label for="chck-payed_subscribers" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Commission</label>
+                                <input type="text" name="admin_com_subscribers" class="form-control" value="<?php echo ($pt->config->admin_com_subscribers);?>" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+                                <small class="admin-info">Le pourcentage de redevance appliqué pour les abonnéments payants (laissez 0 si vous ne voulez pas recevoir de commissions).</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="donate_system" class="main-label">Système de dons</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_donate" id="who_can_donate-admin" onchange="SelectProModel('can_use_donate',this)" value="admin" <?php echo ($pt->config->who_can_donate == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_donate-admin" data-toggle="tooltip" data-placement="bottom" title="Admin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_donate" id="who_can_donate-all" onchange="SelectProModel('can_use_donate',this)" value="all" <?php echo ($pt->config->who_can_donate == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_donate-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_donate" id="who_can_donate-pro" onchange="SelectProModel('can_use_donate',this)" value="pro" <?php echo ($pt->config->who_can_donate == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_donate-pro" data-toggle="tooltip" data-placement="bottom" title="Utilisateurs pro uniquement"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Permettre aux utilisateurs de faire des dons aux chaînes. </small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="donate_system" value="off" />
+                            <input type="checkbox" name="donate_system" id="chck-donate_system" value="on" <?php echo ($pt->config->donate_system == 'on') ? 'checked': '';?>>
+                            <label for="chck-donate_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="invite_links_system" class="main-label">Système d'invitation pour les utilisateurs</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_invite_links" id="who_can_invite_links-admin" onchange="SelectProModel('can_use_invite_links',this)" value="admin" <?php echo ($pt->config->who_can_invite_links == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_invite_links-admin" data-toggle="tooltip" data-placement="bottom" title="Admin"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_invite_links" id="who_can_invite_links-all" onchange="SelectProModel('can_use_invite_links',this)" value="all" <?php echo ($pt->config->who_can_invite_links == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_invite_links-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_invite_links" id="who_can_invite_links-pro" onchange="SelectProModel('can_use_invite_links',this)" value="pro" <?php echo ($pt->config->who_can_invite_links == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_invite_links-pro" data-toggle="tooltip" data-placement="bottom" title="Utilisateurs pro uniquement"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Permettre aux utilisateurs d'inviter d'autres utilisateurs sur votre site.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="invite_links_system" value="off"/>
+                            <input type="checkbox" name="invite_links_system" id="chck-invite_links_system" value="on" <?php echo ($pt->config->invite_links_system == 'on') ? 'checked': '';?>>
+                            <label for="chck-invite_links_system" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group form-float">
+                            <label class="form-label" class="main-label">Combien de liens un utilisateur peut-il générer ?</label>
+                            <div class="form-line">
+                                <input type="text" id="user_links_limit" name="user_links_limit" class="form-control" value="<?php echo $pt->config->user_links_limit?>">
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <label class="form-label" class="main-label">L'utilisateur peut générer X liens en ?</label>
+                            <div class="form-line">
+                                <select class="form-control show-tick" id="expire_user_links" name="expire_user_links">
+                                      <option value="hour" <?php echo ($pt->config->expire_user_links == 'hour')   ? ' selected': '';?>>1 heure</option>
+                                      <option value="day" <?php echo ($pt->config->expire_user_links == 'day')   ? ' selected': '';?>>1 jour</option>
+                                      <option value="week" <?php echo ($pt->config->expire_user_links == 'week')   ? ' selected': '';?>>1 semaine</option>
+                                      <option value="month" <?php echo ($pt->config->expire_user_links == 'month')   ? ' selected': '';?>>1 mois</option>
+                                      <option value="year" <?php echo ($pt->config->expire_user_links == 'year')   ? ' selected': '';?>>1 an</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Autres paramètres</h6>
+                    <div class="server-settings-alert"></div>
+                    <form class="server-settings" method="POST">
+                        <label for="server">Serveur de messagerie et de notifications</label>
+                        <br><small class="admin-info">Choisissez le serveur à utiliser, NodeJS ou Ajax.</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="server" name="server">
+                              <option value="nodejs" <?php echo ($pt->config->server == 'nodejs') ? 'selected': '';?>>WebSockets</option>
+                              <option value="ajax" <?php echo ($pt->config->server == 'ajax') ? 'selected': '';?>>AJAX</option>
+                            </select>
+                        </div>
+                        <hr>
+                        <label for="comment_system">Système de commentaires</label>
+                        <br><small class="admin-info">Choisissez le système de commentaires par défaut.</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="comment_system" name="comment_system">
+                              <option value="both" <?php echo ($pt->config->comment_system == 'both') ? 'selected': '';?>>Les deux</option>
+                              <option value="default" <?php echo ($pt->config->comment_system == 'default') ? 'selected': '';?>>AJAX</option>
+                              <option value="fb" <?php echo ($pt->config->comment_system == 'fb') ? 'selected': '';?>>FaceBook</option>
+                            </select>
+                        </div>
+                        <label for="comments_default_num">Défaut affichage des commentaires</label>
+                        <br><small class="admin-info">Combien de commentaires afficher par défaut ? </small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="comments_default_num" name="comments_default_num">
+                              <option value="10" <?php echo ($pt->config->comments_default_num == '10') ? 'selected': '';?>>10</option>
+                              <option value="20" <?php echo ($pt->config->comments_default_num == '20') ? 'selected': '';?>>20</option>
+                              <option value="30" <?php echo ($pt->config->comments_default_num == '30') ? 'selected': '';?>>30</option>
+                              <option value="40" <?php echo ($pt->config->comments_default_num == '40') ? 'selected': '';?>>40</option>
+                              <option value="50" <?php echo ($pt->config->comments_default_num == '50') ? 'selected': '';?>>50</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+$(function() {
+    $('.js-example-basic-single').select2({
+        placeholder: 'Sélectionner',
+        dir: $('body').hasClass('rtl') ? 'rtl' : ''
+    });
+    $('.switcher input[type=checkbox]').click(function () {
+        var configName = $(this).attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        if ($(this).is(":checked") === true) {
+            objData[configName] = $(this).val();
+        }
+        else{
+            if ($('input[name='+configName+']')[0]) {
+                objData[configName] = $($('input[name='+configName+']')[0]).val();
+            }
+        }
+        objData['hash_id'] = hash_id;
+        $.post('{{LINK aj/ap/save-settings}}', objData);
+    });
+
+    var setTimeOutColor = setTimeout(function (){});
+    $('select').on('change', function() {
+         clearTimeout(setTimeOutColor);
+        var thisElement = $(this);
+        var configName = thisElement.attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        objData[configName] = thisElement.val();
+        objData['hash_id'] = hash_id;
+        thisElement.addClass('warning');
+        $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+            if (data.status == 200) {
+                thisElement.removeClass('warning');
+                thisElement.addClass('success');
+            } else {
+                thisElement.addClass('error');
+            }
+            var setTimeOutColor = setTimeout(function () {
+                thisElement.removeClass('success');
+                thisElement.removeClass('warning');
+                thisElement.removeClass('error');
+            }, 2000);
+        });
+    });
+    $('input[type=text], input[type=number]').on('input', delay(function() {
+            clearTimeout(setTimeOutColor);
+            var thisElement = $(this);
+            var configName = thisElement.attr('name');
+            var hash_id = $('input[name=hash_id]').val();
+            var objData = {};
+            objData[configName] = this.value;
+            objData['hash_id'] = hash_id;
+            thisElement.addClass('warning');
+            $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+                if (data.status == 200) {
+                    thisElement.removeClass('warning');
+                    thisElement.addClass('success');
+                } else {
+                    thisElement.addClass('error');
+                }
+                var setTimeOutColor = setTimeout(function () {
+                    thisElement.removeClass('success');
+                    thisElement.removeClass('warning');
+                    thisElement.removeClass('error');
+                }, 2000);
+                //thisElement.focus();
+            });
+    }, 500));
+});
+
+$(function() {
+    $('#upload_system_type').change(function(event) {
+        if ($(this).val() == 1) {
+            $('#p_f_users_').removeClass('hidden');
+            $('#all_users_').addClass('hidden');
+        }
+        else{
+            $('#all_users_').removeClass('hidden');
+            $('#p_f_users_').addClass('hidden');
+        }
+    });
+    var form_videos_settings = $('form.video-settings');
+
+    var form_user_settings = $('form.user-settings');
+    var form_comment_settings = $('form.comment-settings');
+    var form_api_settings = $('form.api-settings');
+
+    var server_settings = $('form.server-settings');
+
+
+    var payed_settings = $('form.payed-settings');
+
+
+    payed_settings.ajaxForm({
+        url: '{{LINK aj/ap/save-settings}}',
+        beforeSend: function() {
+            payed_settings.find('button').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                payed_settings.find('button').text('Enregistrer');
+                $('.payed-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+                setTimeout(function () {
+                    $('.payed-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+
+
+
+
+
+
+
+
+
+    server_settings.ajaxForm({
+        url: '{{LINK aj/ap/save-settings}}',
+        beforeSend: function() {
+            server_settings.find('.waves-effect').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                server_settings.find('.waves-effect').text('Enregistrer');
+                $('.server-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+                setTimeout(function () {
+                    $('.server-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+    form_videos_settings.ajaxForm({
+        url: '{{LINK aj/ap/save-settings}}',
+        beforeSend: function() {
+            form_videos_settings.find('.waves-effect').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            scrollToTop();
+            if (data.status == 200) {
+            	form_videos_settings.find('.waves-effect').text('Enregistrer');
+            	$('.video-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+            	setTimeout(function () {
+            		$('.video-settings-alert').empty();
+            	}, 2000);
+            }
+            else{
+                form_videos_settings.find('.waves-effect').text('Enregistrer');
+                $('.video-settings-alert').html('<div class="alert alert-danger"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+                setTimeout(function () {
+                    $('.video-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+    form_user_settings.ajaxForm({
+        url: '{{LINK aj/ap/save-settings}}',
+        beforeSend: function() {
+            form_user_settings.find('button').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                form_user_settings.find('button').text('Enregistrer');
+                $('.user-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+                setTimeout(function () {
+                    $('.user-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+    form_api_settings.ajaxForm({
+        url: '{{LINK aj/ap/save-settings}}',
+        beforeSend: function() {
+            form_api_settings.find('button').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                form_api_settings.find('button').text('Enregistrer');
+                $('.api-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+                setTimeout(function () {
+                    $('.api-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+    form_comment_settings.ajaxForm({
+        url: '{{LINK aj/ap/save-settings}}',
+        beforeSend: function() {
+            form_comment_settings.find('.waves-effect').text("{{LANG please_wait}}");
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                form_comment_settings.find('.waves-effect').text('Enregistrer');
+                $('.comment-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Mise à jour réussie des paramètres</div>');
+                setTimeout(function () {
+                    $('.comment-settings-alert').empty();
+                }, 2000);
+            }
+        }
+    });
+
+});
+</script>

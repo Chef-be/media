@@ -1,0 +1,218 @@
+<div class="container-fluid">
+    <div>
+        <h3>Configuration e-mail</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Configuration e-mail</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Configuration e-mail</h6>
+                    <div class="email-settings-alert"></div>
+                    <form class="email-settings" method="POST">
+                        <div class="alert alert-warning">Le nom d’utilisateur de votre e-mail SMTP doit être identique à l’e-mail du site, ou au minimum provenir du même serveur.</div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">E-mail du site</label>
+                                <input type="text" name="email" class="form-control" value="<?php echo ($pt->config->email);?>">
+                                <small class="admin-info">L’e-mail de votre site. Il apparaîtra dans le pied de page du site et dans les e-mails envoyés.</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">E-mail de contact</label>
+                                <input type="text" name="contact_us_email" class="form-control" value="<?php echo ($pt->config->contact_us_email);?>">
+                                <small class="admin-info">Recevez ici les e-mails envoyés via le formulaire de contact. Cet e-mail ne doit pas être le même que l’e-mail principal du site.</small>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <label for="smtp_or_mail">Type de serveur</label>
+                        <br><small class="admin-info">Sélectionnez le serveur d’e-mail que vous souhaitez utiliser. La fonction mail du serveur n’est pas recommandée.</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="smtp_or_mail" name="smtp_or_mail">
+                              <option value="smtp" <?php echo ($pt->config->smtp_or_mail == 'smtp') ? 'selected': '';?>>Serveur SMTP</option>
+                              <option value="mail" <?php echo ($pt->config->smtp_or_mail == 'mail') ? 'selected': '';?>>Mail serveur (par défaut)</option>
+                            </select>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Hôte SMTP</label>
+                                <input type="text" name="smtp_host" class="form-control" value="<?php echo ($pt->config->smtp_host);?>">
+                                <small class="admin-info">Nom d’hôte de votre compte SMTP. Cela peut être une IP, un domaine ou un sous-domaine.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom d'utilisateur SMTP</label>
+                                <input type="text" name="smtp_username" class="form-control" value="<?php echo ($pt->config->smtp_username);?>">
+                                <small class="admin-info">Nom d’utilisateur de votre compte SMTP.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Mot de passe SMTP</label>
+                                <input type="text" name="smtp_password" class="form-control" value="<?php echo ($pt->config->smtp_password);?>">
+                                <small class="admin-info">Mot de passe de votre compte SMTP.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">SMTP Port</label>
+                                <input type="text" name="smtp_port" class="form-control" value="<?php echo ($pt->config->smtp_port);?>">
+                                <small class="admin-info">Quel port utilise votre serveur SMTP ? Les plus courants sont `587` pour TLS et `465` pour le chiffrement SSL.</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <label for="smtp_encryption">Chiffrement SMTP</label>
+                        <br><small class="admin-info">Quelle méthode de chiffrement utilise votre serveur SMTP ?</small>
+                        <div class="form-group">
+                            <select class="form-control show-tick" id="smtp_encryption" name="smtp_encryption">
+                              <option value="tls" <?php echo ($pt->config->smtp_encryption == 'tls') ? 'selected': '';?>>TLS</option>
+                              <option value="ssl" <?php echo ($pt->config->smtp_encryption == 'ssl') ? 'selected': '';?>>SSL</option>
+                            </select>
+                        </div>
+                        <br>
+                        <button type="button" class="btn btn-warning m-t-15 waves-effect" onclick="Pt_TestMessage();">Tester le serveur e-mail</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Diagnostic de délivrabilité e-mail</h6>
+                    <div class="alert alert-info">Cette fonctionnalité teste la délivrabilité des e-mails et vérifie que le système fonctionne correctement.</div>
+                    <form class="debug-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Journal de diagnostic</label>
+                                <textarea name="debug_email" id="debug_email" class="form-control" cols="30" rows="5" style="height: 700px !important;" disabled>Cliquez sur « Diagnostic de délivrabilité e-mail » pour afficher les résultats du test.</textarea>
+                            </div>
+                        </div>
+                        <div class="debug-settings-alert"></div>
+                        <button type="submit" class="btn btn-success m-t-15 waves-effect">Diagnostic de délivrabilité e-mail</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+$(function() {
+    var debug_settings = $('form.debug-settings');
+    debug_settings.ajaxForm({
+        url: '{{LINK aj/ap/email_debug}}',
+        beforeSend: function() {
+            debug_settings.find('.waves-effect').text("Veuillez patienter...");
+        },
+        success: function(data) {
+            debug_settings.find('.waves-effect').text('Diagnostic');
+            $('#debug_email').val(data);
+        },
+        error: function(data) {
+            debug_settings.find('.waves-effect').text('Diagnostic');
+            $('#debug_email').val(data.responseText);
+        }
+    });
+    $('.switcher input[type=checkbox]').click(function () {
+        var configName = $(this).attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        if ($(this).is(":checked") === true) {
+            objData[configName] = $(this).val();
+        }
+        else{
+            if ($('input[name='+configName+']')[0]) {
+                objData[configName] = $($('input[name='+configName+']')[0]).val();
+            }
+        }
+        objData['hash_id'] = hash_id;
+        $.post('{{LINK aj/ap/save-settings}}', objData);
+    });
+
+    var setTimeOutColor = setTimeout(function (){});
+    $('select').on('change', function() {
+         clearTimeout(setTimeOutColor);
+        var thisElement = $(this);
+        var configName = thisElement.attr('name');
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        objData[configName] = this.value;
+        objData['hash_id'] = hash_id;
+        thisElement.addClass('warning');
+        $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+            if (data.status == 200) {
+                thisElement.removeClass('warning');
+                thisElement.addClass('success');
+            } else {
+                thisElement.addClass('error');
+            }
+            var setTimeOutColor = setTimeout(function () {
+                thisElement.removeClass('success');
+                thisElement.removeClass('warning');
+                thisElement.removeClass('error');
+            }, 2000);
+        });
+    });
+    $('input[type=text], input[type=number] , textarea').on('input', delay(function() {
+            clearTimeout(setTimeOutColor);
+            var thisElement = $(this);
+            var configName = thisElement.attr('name');
+            var hash_id = $('input[name=hash_id]').val();
+            var objData = {};
+            objData[configName] = this.value;
+            objData['hash_id'] = hash_id;
+            thisElement.addClass('warning');
+            $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+                if (data.status == 200) {
+                    thisElement.removeClass('warning');
+                    thisElement.addClass('success');
+                } else {
+                    thisElement.addClass('error');
+                }
+                var setTimeOutColor = setTimeout(function () {
+                    thisElement.removeClass('success');
+                    thisElement.removeClass('warning');
+                    thisElement.removeClass('error');
+                }, 2000);
+                //thisElement.focus();
+            });
+    }, 500));
+});
+function Pt_TestMessage() {
+    $('form.email-settings').find('.btn-warning').text('Veuillez patienter...');
+    $.get('{{LINK aj/ap/test_message}}', function (data) {
+        if (data.status == 200) {
+            $('.email-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Message sent!</div>');
+            setTimeout(function () {
+                $('.email-settings-alert').empty();
+            }, 2000);
+        } else {
+            $('.email-settings-alert').html('<div class="alert alert-danger">Message failed to sent, error: '+data.error+'</div>');
+            setTimeout(function () {
+                $('.email-settings-alert').empty();
+            }, 2000);
+        }
+        $('form.email-settings').find('.btn-warning').text('Tester le serveur e-mail');
+    });
+}
+</script>

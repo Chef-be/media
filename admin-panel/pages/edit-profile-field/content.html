@@ -1,0 +1,144 @@
+<?php
+    if (empty($_GET['id'])) {
+       header("Location: " . PT_Link('admin-cp'));
+       exit();
+    }
+    $table            = T_FIELDS;
+    $id               = (!empty($_GET['id'])) ? $_GET['id'] : false;
+    $fl_profile_field = $db->where('id',$id)->getOne($table);
+    if (empty($fl_profile_field)) {
+       header("Location: " . PT_Link('admin-cp'));
+       exit();
+    }
+    $field  = $fl_profile_field; 
+
+?>
+<div class="container-fluid">
+    <div>
+        <h3>Modifier le champ personnalisé</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Panneau d'administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Utilisateurs</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Modifier le champ personnalisé</li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-8 col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Modifier le champ personnalisé #<?php echo $_GET['id'] ?></h6>
+                    <div class="add-settings-alert"></div>
+                    <form class="add-settings" method="POST">
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Nom du champ</label>
+                                <input type="text" id="name" name="name" class="form-control" value="<?php echo $field->name?>">
+                                
+                            </div>
+                        </div>
+                        <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Longueur du champ : <small>La valeur par défaut est 32 et la valeur maximale est 1000</small></label>
+                                <input type="text" id="length" name="length" class="form-control" value="<?php echo $field->length?>">
+                                
+                            </div>
+                        </div>
+                         <div class="form-group form-float">
+                            <div class="form-line">
+                                <label class="form-label">Description du champ : <small>La description sera affichée sous le champ</small></label>
+                                <textarea name="description" id="description" class="form-control" cols="30" rows="3"><?php echo $field->description?></textarea>
+                                
+                            </div>
+                        </div>
+                        <label for="placement">Emplacement du champ</label>
+                        <select class="form-control show-tick " id="placement" name="placement">
+                         	<option value="general" <?php echo ($field->placement == 'general') ? 'selected': '';?>>Paramètres généraux</option>
+		                 	<option value="profile" <?php echo ($field->placement == 'profile') ? 'selected': '';?>>Paramètres du profil</option>
+		                 	<option value="social" <?php echo ($field->placement == 'social') ? 'selected': '';?>>Liens sociaux</option>
+		                 	<option value="none" <?php echo ($field->placement == 'none') ? 'selected': '';?>>Ne pas afficher le champ dans les paramètres</option>
+                        </select>
+                        <div class="clearfix"></div>
+                        <br>
+                        <label for="registration_page">Afficher sur la page d'inscription</label>
+                        <select class="form-control show-tick" id="registration_page" name="registration_page">
+                         		<option value="0" <?php echo ($field->registration_page == '0') ? 'selected': '';?>>Non</option>
+                 				<option value="1" <?php echo ($field->registration_page == '1') ? 'selected': '';?>>Oui</option>
+                        </select>
+                        <div class="clearfix"></div>
+                        <br>
+                        <label for="profile_page">Afficher sur la page de profil utilisateur</label>
+                        <select class="form-control show-tick" id="profile_page" name="profile_page">
+                         		<option value="0" <?php echo ($field->profile_page == '0') ? 'selected': '';?>>Non</option>
+                  				<option value="1" <?php echo ($field->profile_page == '1') ? 'selected': '';?>>Oui</option>
+                        </select>
+                        <div class="clearfix"></div>
+                        <br>
+                        <label for="active">Actif</label>
+                        <select class="form-control show-tick" id="active" name="active">
+                         		<option value="0" <?php echo ($field->active == '0') ? 'selected': '';?>>Non</option>
+                 				 <option value="1" <?php echo ($field->active == '1') ? 'selected': '';?>>Oui</option>
+                        </select>
+                        <div class="clearfix"></div>
+                        <br><br>
+                        <?php if ($field->type == 'select') { ?>
+                            <div class="form-group form-float options">
+                                <div class="form-line">
+                                    <label class="form-label">Options du champ de sélection : <small>Une option par ligne.</small></label>
+                                    <textarea name="options" id="options" class="form-control" cols="30" rows="3"><?php echo str_replace(',', "\n", $field->options)?></textarea>
+                                    
+                                </div>
+                            </div>
+                        <?php } ?>
+                        <input type="hidden" name="id" value="<?php echo $field->id;?>">
+                        <button type="submit" class="btn btn-primary m-t-15 waves-effect">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<script>
+$(function() {
+	$('.chosen-select').on('change', function(evt, params) {
+        var selectedValue = $(this).val();
+        if (selectedValue == 'select') {
+       	  $('.options').fadeIn(200);
+        } 
+
+        else {
+       	  $('.options').fadeOut(200);
+        }
+    });
+});
+
+$(function() {
+    var form_add_settings = $('form.add-settings');
+    form_add_settings.ajaxForm({ 
+        url: '{{LINK aj/ap/update-field}}',
+        beforeSend: function() {
+            form_add_settings.find('.waves-effect').text('Veuillez patienter...');
+        },
+        success: function(data) {
+            if (data.status == 200) {
+                $("html, body").animate({ scrollTop: 0 }, "slow");
+                $('.add-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Champ enregistré avec succès</div>');
+                setTimeout(function () {
+		            window.location.href = '<?php echo PT_LoadAdminLinkSettings('manage-profile-fields'); ?>';
+		        }, 1000);
+            } 
+            else if (data.status == 400) {
+	          alert(data.message);
+	        }
+	        form_add_settings.find('.waves-effect').text('Enregistrer');
+        }
+    });
+});
+</script>

@@ -1,0 +1,978 @@
+<div class="container-fluid">
+    <div>
+        <h3>Paramètres du direct</h3>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">Administration</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="#">Paramètres</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Paramètres du direct</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="alert alert-info">
+       <strong>Info : </strong> Pour plus d’informations sur la configuration du service de direct, veuillez consulter notre page de <a href="https://docs.playtubescript.com/#idocs_agora" target="_blank">documentation</a>.
+   </div>
+    <div class="card">
+        <div class="card-body">
+            <h6 class="card-title">Providers du direct</h6>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">Provider par défaut</label>
+                    <select class="form-control" name="live_provider" id="live_provider">
+                        <option value="agora" <?php echo ($pt->config->live_provider == 'agora') ? 'selected' : ''; ?>>Agora</option>
+                        <option value="chef_live" <?php echo ($pt->config->live_provider == 'chef_live') ? 'selected' : ''; ?>>Chef Live</option>
+                    </select>
+                    <small class="admin-info">Le provider sélectionné sera utilisé pour les nouveaux directs.</small>
+                </div>
+                <div class="col-lg-4 col-md-3">
+                    <div class="float-left">
+                        <label for="agora_enabled" class="main-label">Agora activé</label>
+                        <br><small class="admin-info">Permet de conserver le mode navigateur actuel.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="agora_enabled" value="0" />
+                        <input type="checkbox" name="agora_enabled" id="chck-agora_enabled" value="1" <?php echo ($pt->config->agora_enabled == '1') ? 'checked': '';?>>
+                        <label for="chck-agora_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-3">
+                    <div class="float-left">
+                        <label for="chef_live_enabled" class="main-label">Chef Live activé</label>
+                        <br><small class="admin-info">Active le provider RTMP/HLS/WebRTC intégré.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_enabled" id="chck-chef_live_enabled" value="1" <?php echo ($pt->config->chef_live_enabled == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="chef-live-health-alert"></div>
+            <div class="chef-live-sync-alert"></div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">API Chef Live</label>
+                            <input type="text" name="chef_live_api_url" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_api_url');?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">RTMP Chef Live</label>
+                            <input type="text" name="chef_live_rtmp_url" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_rtmp_url');?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">HLS Chef Live</label>
+                            <input type="text" name="chef_live_hls_url" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_hls_url');?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">WebRTC Chef Live</label>
+                            <input type="text" name="chef_live_webrtc_url" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_webrtc_url');?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-info" onclick="ChefLiveHealth()">Tester Chef Live</button>
+            <button type="button" class="btn btn-primary" onclick="SyncChefLiveConfig()">Synchroniser Chef Live</button>
+            <button type="button" class="btn btn-secondary" onclick="LoadChefLiveConfig()">Charger la config du service</button>
+        </div>
+    </div>
+    <div class="card chef-live-runtime-panel">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div>
+                    <h6 class="card-title mb-0">État du serveur Chef Live</h6>
+                    <p class="text-muted m-b-0">Vue d’exploitation du moteur de streaming maison: service, moteur média, métriques et chemins actifs.</p>
+                </div>
+                <div class="m-t-10">
+                    <button type="button" class="btn btn-outline-primary" onclick="RefreshChefLiveRuntime()">Actualiser l’état</button>
+                </div>
+            </div>
+            <div class="chef-live-runtime-alert m-t-20"></div>
+            <div class="row m-t-20">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border mb-3">
+                        <div class="card-body">
+                            <small class="text-muted d-block">API Chef Live</small>
+                            <strong class="chef-live-stat-api">-</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border mb-3">
+                        <div class="card-body">
+                            <small class="text-muted d-block">Moteur média</small>
+                            <strong class="chef-live-stat-engine">-</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border mb-3">
+                        <div class="card-body">
+                            <small class="text-muted d-block">Chemins actifs</small>
+                            <strong class="chef-live-stat-paths">0</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card border mb-3">
+                        <div class="card-body">
+                            <small class="text-muted d-block">Streams enregistrés</small>
+                            <strong class="chef-live-stat-streams">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row m-t-10">
+                <div class="col-lg-12">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Path</th>
+                                    <th>Prêt</th>
+                                    <th>Readers</th>
+                                    <th>Source</th>
+                                    <th>Octets reçus</th>
+                                </tr>
+                            </thead>
+                            <tbody class="chef-live-paths-body">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Aucune donnée runtime chargée.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card chef-live-settings-panel">
+        <div class="card-body">
+            <h6 class="card-title">Paramètres avancés de Chef Live</h6>
+            <p class="text-muted m-b-20">Ce panneau centralise les réglages d’un serveur de streaming maison intégré à la plateforme: publication, lecture, enregistrement, sécurité, WebRTC, monitoring et exploitation.</p>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">Nom du serveur</label>
+                            <input type="text" name="chef_live_server_name" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_server_name');?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">Hôte public</label>
+                            <input type="text" name="chef_live_public_host" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_public_host');?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">App ingest</label>
+                            <input type="text" name="chef_live_ingest_app" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_ingest_app');?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <div class="form-group form-float">
+                        <div class="form-line">
+                            <label class="form-label">App playback</label>
+                            <input type="text" name="chef_live_playback_app" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_playback_app');?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <h6 class="card-title">Protocoles et lecture</h6>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_rtmp_enabled" class="main-label">RTMP activé</label>
+                        <br><small class="admin-info">Active la publication via OBS ou encodeur RTMP.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_rtmp_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_rtmp_enabled" id="chck-chef_live_rtmp_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_rtmp_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_rtmp_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_hls_enabled" class="main-label">HLS activé</label>
+                        <br><small class="admin-info">Diffuse en HTTP pour la lecture large public.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_hls_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_hls_enabled" id="chck-chef_live_hls_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_hls_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_hls_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_webrtc_enabled" class="main-label">WebRTC activé</label>
+                        <br><small class="admin-info">Autorise la lecture ou les usages basse latence.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_webrtc_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_webrtc_enabled" id="chck-chef_live_webrtc_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_webrtc_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_webrtc_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_low_latency" class="main-label">Mode basse latence</label>
+                        <br><small class="admin-info">Optimise les buffers et la lecture temps réel.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_low_latency" value="0" />
+                        <input type="checkbox" name="chef_live_low_latency" id="chck-chef_live_low_latency" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_low_latency') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_low_latency" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_ll_hls" class="main-label">LL-HLS</label>
+                        <br><small class="admin-info">Active la variante HLS à faible latence.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_ll_hls" value="0" />
+                        <input type="checkbox" name="chef_live_ll_hls" id="chck-chef_live_ll_hls" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_ll_hls') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_ll_hls" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Segments HLS conservés</label>
+                    <input type="number" min="1" name="chef_live_hls_segment_count" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_hls_segment_count');?>">
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Durée segment HLS (s)</label>
+                    <input type="number" min="1" name="chef_live_hls_segment_duration" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_hls_segment_duration');?>">
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Viewers max par live</label>
+                    <input type="number" min="0" name="chef_live_max_viewers" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_max_viewers');?>">
+                </div>
+            </div>
+            <hr>
+            <h6 class="card-title">Enregistrement et transcodage</h6>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_recording_enabled" class="main-label">Enregistrement</label>
+                        <br><small class="admin-info">Archive automatiquement les directs.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_recording_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_recording_enabled" id="chck-chef_live_recording_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_recording_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_recording_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_dvr_enabled" class="main-label">DVR / Replay live</label>
+                        <br><small class="admin-info">Permet la reprise pendant le direct.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_dvr_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_dvr_enabled" id="chck-chef_live_dvr_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_dvr_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_dvr_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_transcoding_enabled" class="main-label">Transcodage</label>
+                        <br><small class="admin-info">Active les profils multi-bitrate.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_transcoding_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_transcoding_enabled" id="chck-chef_live_transcoding_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_transcoding_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_transcoding_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_adaptive_bitrate" class="main-label">ABR</label>
+                        <br><small class="admin-info">Active le basculement entre profils de qualité.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_adaptive_bitrate" value="0" />
+                        <input type="checkbox" name="chef_live_adaptive_bitrate" id="chck-chef_live_adaptive_bitrate" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_adaptive_bitrate') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_adaptive_bitrate" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Format d’enregistrement</label>
+                    <select class="form-control" name="chef_live_recording_format">
+                        <option value="mp4" <?php echo (PT_GetChefLiveConfigValue('chef_live_recording_format') == 'mp4') ? 'selected' : ''; ?>>MP4</option>
+                        <option value="ts" <?php echo (PT_GetChefLiveConfigValue('chef_live_recording_format') == 'ts') ? 'selected' : ''; ?>>TS</option>
+                        <option value="mkv" <?php echo (PT_GetChefLiveConfigValue('chef_live_recording_format') == 'mkv') ? 'selected' : ''; ?>>MKV</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Bitrate max entrant (kbps)</label>
+                    <input type="number" min="0" name="chef_live_max_bitrate" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_max_bitrate');?>">
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Driver de stockage</label>
+                    <select class="form-control" name="chef_live_storage_driver">
+                        <option value="local" <?php echo (PT_GetChefLiveConfigValue('chef_live_storage_driver') == 'local') ? 'selected' : ''; ?>>Local</option>
+                        <option value="s3" <?php echo (PT_GetChefLiveConfigValue('chef_live_storage_driver') == 's3') ? 'selected' : ''; ?>>S3</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Rétention des enregistrements (jours)</label>
+                    <input type="number" min="0" name="chef_live_retention_days" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_retention_days');?>">
+                </div>
+            </div>
+            <div class="form-group m-t-20">
+                <label class="form-label">Ladder de transcodage</label>
+                <textarea name="chef_live_transcoding_ladder" class="form-control" rows="4" placeholder="1080p:6000&#10;720p:3000&#10;480p:1500"><?php echo PT_GetChefLiveConfigValue('chef_live_transcoding_ladder');?></textarea>
+                <small class="admin-info">Un profil par ligne, format `résolution:bitrate`.</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Chemin d’enregistrement</label>
+                <input type="text" name="chef_live_record_path" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_record_path');?>">
+            </div>
+            <hr>
+            <h6 class="card-title">Sécurité, auth et réseau</h6>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_token_auth" class="main-label">Token auth</label>
+                        <br><small class="admin-info">Force l’usage d’un jeton pour publier ou lire.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_token_auth" value="0" />
+                        <input type="checkbox" name="chef_live_token_auth" id="chck-chef_live_token_auth" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_token_auth') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_token_auth" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="float-left">
+                        <label for="chef_live_metrics_enabled" class="main-label">Métriques</label>
+                        <br><small class="admin-info">Expose l’état et les stats d’exploitation.</small>
+                    </div>
+                    <div class="form-group float-right switcher">
+                        <input type="hidden" name="chef_live_metrics_enabled" value="0" />
+                        <input type="checkbox" name="chef_live_metrics_enabled" id="chck-chef_live_metrics_enabled" value="1" <?php echo (PT_GetChefLiveConfigValue('chef_live_metrics_enabled') == '1') ? 'checked': '';?>>
+                        <label for="chck-chef_live_metrics_enabled" class="check-trail"><span class="check-handler"></span></label>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Intervalle monitoring (s)</label>
+                    <input type="number" min="1" name="chef_live_monitor_interval" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_monitor_interval');?>">
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label">Niveau de logs</label>
+                    <select class="form-control" name="chef_live_log_level">
+                        <option value="debug" <?php echo (PT_GetChefLiveConfigValue('chef_live_log_level') == 'debug') ? 'selected' : ''; ?>>Debug</option>
+                        <option value="info" <?php echo (PT_GetChefLiveConfigValue('chef_live_log_level') == 'info') ? 'selected' : ''; ?>>Info</option>
+                        <option value="warn" <?php echo (PT_GetChefLiveConfigValue('chef_live_log_level') == 'warn') ? 'selected' : ''; ?>>Warn</option>
+                        <option value="error" <?php echo (PT_GetChefLiveConfigValue('chef_live_log_level') == 'error') ? 'selected' : ''; ?>>Error</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">JWT secret</label>
+                    <input type="text" name="chef_live_jwt_secret" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_jwt_secret');?>">
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">IP autorisées à publier</label>
+                    <input type="text" name="chef_live_publish_allow_list" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_publish_allow_list');?>">
+                    <small class="admin-info">Liste CSV ou CIDR autorisés.</small>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">Plage UDP WebRTC</label>
+                    <input type="text" name="chef_live_webrtc_udp_ports" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_webrtc_udp_ports');?>">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">Serveurs STUN</label>
+                    <input type="text" name="chef_live_stun_servers" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_stun_servers');?>">
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label">Serveur TURN</label>
+                    <input type="text" name="chef_live_turn_server" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_turn_server');?>">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Utilisateur TURN</label>
+                    <input type="text" name="chef_live_turn_username" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_turn_username');?>">
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <label class="form-label">Mot de passe TURN</label>
+                    <input type="text" name="chef_live_turn_password" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_turn_password');?>">
+                </div>
+            </div>
+            <div class="row m-t-20">
+                <div class="col-lg-6 col-md-12">
+                    <label class="form-label">Webhook d’état</label>
+                    <input type="text" name="chef_live_webhook_url" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_webhook_url');?>">
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <label class="form-label">Secret de signature webhook</label>
+                    <input type="text" name="chef_live_webhook_secret" class="form-control" value="<?php echo PT_GetChefLiveConfigValue('chef_live_webhook_secret');?>">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div>
+                    <h6 class="card-title mb-0">Serveurs de streaming additionnels</h6>
+                    <p class="text-muted m-b-0">Ajoutez d’autres serveurs RTMP/HLS/WebRTC qui pourront être proposés aux créateurs en mode encodeur.</p>
+                </div>
+                <div class="m-t-10">
+                    <button type="button" class="btn btn-outline-primary" onclick="AddExternalLiveServer()">Ajouter un serveur</button>
+                </div>
+            </div>
+            <div class="external-live-servers-alert m-t-20"></div>
+            <input type="hidden" name="live_external_servers_json" id="live_external_servers_json" value="<?php echo htmlspecialchars($pt->config->live_external_servers_json, ENT_QUOTES); ?>">
+            <div class="external-live-servers-list m-t-20"></div>
+        </div>
+    </div>
+    <!-- Vertical Layout -->
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Paramètres du streaming en direct</h6>
+                    <div class="email-settings-alert"></div>
+                    <form class="email-settings" method="POST">
+                        <div class="float-left">
+                            <label for="live_video" class="main-label">Streaming en direct</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_live_video" id="who_can_live_video-admin" onchange="SelectProModel('can_use_live_video',this)" value="admin" <?php echo ($pt->config->who_can_live_video == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_live_video-admin" data-toggle="tooltip" data-placement="bottom" title="Administrateur"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_live_video" id="who_can_live_video-all" onchange="SelectProModel('can_use_live_video',this)" value="all" <?php echo ($pt->config->who_can_live_video == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_live_video-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_live_video" id="who_can_live_video-pro" onchange="SelectProModel('can_use_live_video',this)" value="pro" <?php echo ($pt->config->who_can_live_video == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_live_video-pro" data-toggle="tooltip" data-placement="bottom" title="Utilisateurs Pro uniquement"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Les utilisateurs peuvent lancer un direct instantanément.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="live_video" value="0" />
+                            <input type="checkbox" name="live_video" id="chck-live_video" value="1" <?php echo ($pt->config->live_video == '1') ? 'checked': '';?>>
+                            <label for="chck-live_video" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                        <div class="clearfix"></div>
+                        <hr>
+                        <div class="float-left">
+                            <label for="live_video_save" class="main-label">Stockage du streaming en direct</label>
+                            <div class="dropdown user_filter_drop">
+                                <button class="btn btn-light" data-toggle="dropdown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z"></path></svg>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <div class="dropdown-menu-innr">
+                                        <b>Qui peut utiliser cette fonctionnalité ?</b>
+                                        <div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_live_save" id="who_can_live_save-admin" onchange="SelectProModel('can_use_live_save',this)" value="admin" <?php echo ($pt->config->who_can_live_save == 'admin')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_live_save-admin" data-toggle="tooltip" data-placement="bottom" title="Administrateur"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M17.13,17C15.92,18.85 14.11,20.24 12,20.92C9.89,20.24 8.08,18.85 6.87,17C6.53,16.5 6.24,16 6,15.47C6,13.82 8.71,12.47 12,12.47C15.29,12.47 18,13.79 18,15.47C17.76,16 17.47,16.5 17.13,17Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_live_save" id="who_can_live_save-all" onchange="SelectProModel('can_use_live_save',this)" value="all" <?php echo ($pt->config->who_can_live_save == 'all')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_live_save-all" data-toggle="tooltip" data-placement="bottom" title="Tous les utilisateurs"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"></path></svg></label> 
+                                            </div>
+                                            <div class="round_check">
+                                                <input type="radio" name="who_can_live_save" id="who_can_live_save-pro" onchange="SelectProModel('can_use_live_save',this)" value="pro" <?php echo ($pt->config->who_can_live_save == 'pro')   ? ' checked' : '';?>>
+                                                <label class="radio-inline" for="who_can_live_save-pro" data-toggle="tooltip" data-placement="bottom" title="Utilisateurs Pro uniquement"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z"></path></svg></label> 
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ul>
+                            </div>
+                            <br><small class="admin-info">Autoriser le système de direct à enregistrer les flux sur Amazon.</small>
+                        </div>
+                        <div class="form-group float-right switcher">
+                            <input type="hidden" name="live_video_save" value="0" />
+                            <input type="checkbox" name="live_video_save" id="chck-live_video_save" value="1" <?php echo ($pt->config->live_video_save == '1') ? 'checked': '';?>>
+                            <label for="chck-live_video_save" class="check-trail"><span class="check-handler"></span></label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-6 col-md-6">
+        <div class="card">
+           <div class="card-body">
+               <h6 class="card-title">Configuration de l’API Agora</h6>
+               <div class="agora-settings-alert"></div>
+               <form class="agora-settings" method="POST">
+                   <div class="alert-info alert">Pour commencer à utiliser cette fonctionnalité, vous devez créer un compte sur <a href="https://www.agora.io/en/">Agora</a>.</div>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">ID de l’application</label>
+                           <input type="text" name="agora_app_id" class="form-control" value="<?php echo ($pt->config->agora_app_id);?>">
+                           <small class="admin-info"></small>
+                       </div>
+                   </div>
+                   <hr>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">Certificat de l’application</label>
+                           <input type="text" name="agora_app_certificate" class="form-control" value="<?php echo ($pt->config->agora_app_certificate);?>">
+                           <small class="admin-info"></small>
+                       </div>
+                   </div>
+                   <hr>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">ID client</label>
+                           <input type="text" name="agora_customer_id" class="form-control" value="<?php echo ($pt->config->agora_customer_id);?>">
+                           <small class="admin-info"></small>
+                       </div>
+                   </div>
+                   <hr>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">Secret client</label>
+                           <input type="text" name="agora_customer_certificate" class="form-control" value="<?php echo ($pt->config->agora_customer_certificate);?>">
+                           <small class="admin-info"></small>
+                       </div>
+                   </div>
+                   <hr>
+                   <div class="float-left">
+                       <label for="amazone_s3_2" class="main-label">Stockage Amazon S3 pour le direct</label>
+                       <br><small class="admin-info">Utilisé pour stocker les flux vidéo si le stockage du streaming en direct est activé.</small>
+                   </div>
+                   <div class="form-group float-right switcher">
+                       <input type="hidden" name="amazone_s3_2" value="0" />
+                       <input type="checkbox" name="amazone_s3_2" id="chck-amazone_s3_2" value="1" <?php echo ($pt->config->amazone_s3_2 == '1') ? 'checked': '';?>>
+                       <label for="chck-amazone_s3_2" class="check-trail"><span class="check-handler"></span></label>
+                   </div>
+                   <div class="clearfix"></div>
+                   <hr>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">Nom du bucket Amazon</label>
+                           <input type="text" name="bucket_name_2" class="form-control" value="<?php echo ($pt->config->bucket_name_2);?>">
+                           <small class="admin-info">Nom de votre bucket Amazon S3.</small>
+                       </div>
+                   </div>
+                   <hr>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">Clé Amazon S3</label>
+                           <input type="text" name="amazone_s3_key_2" class="form-control" value="<?php echo ($pt->config->amazone_s3_key_2);?>">
+                           <small class="admin-info">Votre clé Amazon issue de vos identifiants AWS.</small>
+                       </div>
+                   </div>
+                   <hr>
+                   <div class="form-group form-float">
+                       <div class="form-line">
+                           <label class="form-label">Clé secrète Amazon S3</label>
+                           <input type="text" name="amazone_s3_s_key_2" class="form-control" value="<?php echo ($pt->config->amazone_s3_s_key_2);?>">
+                           <small class="admin-info">Votre secret Amazon issu de vos identifiants AWS.</small>
+                       </div>
+                   </div>
+                   <hr>
+                   <label for="region_2">Région du bucket Amazon S3</label>
+                   <br><small class="admin-info"></small>
+                   <div class="form-group">
+                       <select class="form-control show-tick" id="region_2" name="region_2">
+                         <option value="us-east-1" <?php echo ($pt->config->region_2 == 'us-east-1')   ? ' selected' : '';?> >États-Unis Est (Virginie du Nord)</option>
+                         <option value="us-east-2" <?php echo ($pt->config->region_2 == 'us-east-2')   ? ' selected' : '';?> >États-Unis Est (Ohio)</option>
+                         <option value="us-west-1" <?php echo ($pt->config->region_2 == 'us-west-1')   ? ' selected' : '';?> >États-Unis Ouest (Californie du Nord)</option>
+                         <option value="us-west-2" <?php echo ($pt->config->region_2 == 'us-west-2')   ? ' selected' : '';?> >États-Unis Ouest (Oregon)</option>
+                         <option value="ap-northeast-2" <?php echo ($pt->config->region_2 == 'ap-northeast-2')   ? ' selected' : '';?> >Asie-Pacifique (Séoul)</option>
+                         <option value="ap-south-1" <?php echo ($pt->config->region_2 == 'ap-south-1')   ? ' selected' : '';?> >Asie-Pacifique (Mumbai)</option>
+                         <option value="ap-southeast-1" <?php echo ($pt->config->region_2 == 'ap-southeast-1')   ? ' selected' : '';?> >Asie-Pacifique (Singapour)</option>
+                         <option value="ap-southeast-2" <?php echo ($pt->config->region_2 == 'ap-southeast-2')   ? ' selected' : '';?> >Asie-Pacifique (Sydney)</option>
+                         <option value="ap-northeast-1" <?php echo ($pt->config->region_2 == 'ap-northeast-1')   ? ' selected' : '';?> >Asie-Pacifique (Tokyo)</option>
+                         <option value="ca-central-1" <?php echo ($pt->config->region_2 == 'ca-central-1')   ? ' selected' : '';?> >Canada (Centre)</option>
+                         <option value="eu-central-1" <?php echo ($pt->config->region_2 == 'eu-central-1')   ? ' selected' : '';?> >UE (Francfort)</option>
+                         <option value="eu-west-1" <?php echo ($pt->config->region_2 == 'eu-west-1')   ? ' selected' : '';?> >UE (Irlande)</option>
+                         <option value="eu-west-2" <?php echo ($pt->config->region_2 == 'eu-west-2')   ? ' selected' : '';?> >UE (Londres)</option>
+                         <option value="sa-east-1" <?php echo ($pt->config->region_2 == 'sa-east-1')   ? ' selected' : '';?> >Amérique du Sud (São Paulo)</option>
+                       </select>
+                   </div>
+                   <hr>
+                   <div class="alert alert-info">
+                      Avant d’activer Amazon S3, assurez-vous d’avoir envoyé tout le dossier "upload/" vers votre bucket. <br><br>
+                       Avant de désactiver Amazon S3, assurez-vous d’avoir téléchargé tout le dossier "upload/" sur votre serveur.<br><br>
+                       Nous recommandons d’envoyer le dossier et les fichiers via <a href="http://s3tools.org/s3cmd">S3cmd</a>.<br><br>
+                       Si votre site est encore tout neuf, vous pouvez ignorer l’étape d’envoi, mais veillez à cliquer sur `Tester la connexion`.<br>
+                   </div>
+                   <button type="button" class="btn btn-warning m-t-15" onclick="Wo_TestS3()">Tester la connexion</button>
+               </form>
+           </div>
+       </div>
+       </div>
+        <div class="clearfix"></div>
+    </div>
+    <!-- #END# Vertical Layout -->
+<style>
+.chef-live-disabled {
+    opacity: .6;
+}
+.chef-live-runtime-panel .card.border {
+    border-color: #d7dce3 !important;
+}
+</style>
+<script>
+var PT_EXTERNAL_LIVE_SERVERS = <?php echo json_encode(PT_GetExternalLiveServers()); ?>;
+
+$(function() {
+    $('#live_provider').on('change', function () {
+        toggleLiveProviderPanels();
+    });
+    toggleLiveProviderPanels();
+    RefreshChefLiveRuntime();
+    RenderExternalLiveServers();
+
+    $('.switcher input[type=checkbox]').click(function () {
+        var configName = $(this).attr('name');
+        if (!configName) {
+            return;
+        }
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        if ($(this).is(":checked") === true) {
+            objData[configName] = $(this).val();
+        }
+        else{
+            if ($('input[name='+configName+']')[0]) {
+                objData[configName] = $($('input[name='+configName+']')[0]).val();
+            }
+        }
+        objData['hash_id'] = hash_id;
+        $.post('{{LINK aj/ap/save-settings}}', objData);
+    });
+
+    var setTimeOutColor = setTimeout(function (){});
+    $('select').on('change', function() {
+         clearTimeout(setTimeOutColor);
+        var thisElement = $(this);
+        var configName = thisElement.attr('name');
+        if (!configName) {
+            return;
+        }
+        var hash_id = $('input[name=hash_id]').val();
+        var objData = {};
+        objData[configName] = this.value;
+        objData['hash_id'] = hash_id;
+        thisElement.addClass('warning');
+        $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+            if (data.status == 200) {
+                thisElement.removeClass('warning');
+                thisElement.addClass('success');
+            } else {
+                thisElement.addClass('error');
+            }
+            var setTimeOutColor = setTimeout(function () {
+                thisElement.removeClass('success');
+                thisElement.removeClass('warning');
+                thisElement.removeClass('error');
+            }, 2000);
+        });
+    });
+    $('input[type=text], input[type=number] , textarea').on('input', delay(function() {
+            clearTimeout(setTimeOutColor);
+            var thisElement = $(this);
+            var configName = thisElement.attr('name');
+            if (!configName) {
+                return;
+            }
+            var hash_id = $('input[name=hash_id]').val();
+            var objData = {};
+            objData[configName] = this.value;
+            objData['hash_id'] = hash_id;
+            thisElement.addClass('warning');
+            $.post("{{LINK aj/ap/save-settings}}", objData, function (data) {
+                if (data.status == 200) {
+                    thisElement.removeClass('warning');
+                    thisElement.addClass('success');
+                } else {
+                    thisElement.addClass('error');
+                }
+                var setTimeOutColor = setTimeout(function () {
+                    thisElement.removeClass('success');
+                    thisElement.removeClass('warning');
+                    thisElement.removeClass('error');
+                }, 2000);
+                //thisElement.focus();
+            });
+    }, 500));
+});
+function BuildExternalLiveServerCard(server, index) {
+    server = server || {};
+    return '' +
+        '<div class="card border external-live-server-card" data-index="' + index + '">' +
+            '<div class="card-body">' +
+                '<div class="d-flex align-items-center justify-content-between flex-wrap">' +
+                    '<h6 class="mb-0">Serveur #' + (index + 1) + '</h6>' +
+                    '<button type="button" class="btn btn-sm btn-outline-danger" onclick="RemoveExternalLiveServer(' + index + ')">Supprimer</button>' +
+                '</div>' +
+                '<div class="row m-t-20">' +
+                    '<div class="col-lg-3 col-md-6"><label class="form-label">Nom</label><input type="text" class="form-control" data-live-server-field="name" value="' + escapeHtml(server.name || '') + '"></div>' +
+                    '<div class="col-lg-2 col-md-6"><label class="form-label">Identifiant</label><input type="text" class="form-control" data-live-server-field="id" value="' + escapeHtml(server.id || '') + '"></div>' +
+                    '<div class="col-lg-2 col-md-6"><label class="form-label">Actif</label><select class="form-control" data-live-server-field="enabled"><option value="1"' + (String(server.enabled || '1') === '1' ? ' selected' : '') + '>Oui</option><option value="0"' + (String(server.enabled || '1') === '0' ? ' selected' : '') + '>Non</option></select></div>' +
+                    '<div class="col-lg-2 col-md-6"><label class="form-label">Mode navigateur</label><select class="form-control" data-live-server-field="browser_enabled"><option value="1"' + (String(server.browser_enabled || '0') === '1' ? ' selected' : '') + '>Oui</option><option value="0"' + (String(server.browser_enabled || '0') === '0' ? ' selected' : '') + '>Non</option></select></div>' +
+                    '<div class="col-lg-2 col-md-6"><label class="form-label">Mode encodeur</label><select class="form-control" data-live-server-field="encoder_enabled"><option value="1"' + (String(server.encoder_enabled || '1') === '1' ? ' selected' : '') + '>Oui</option><option value="0"' + (String(server.encoder_enabled || '1') === '0' ? ' selected' : '') + '>Non</option></select></div>' +
+                    '<div class="col-lg-1 col-md-12"><label class="form-label">Préfixe</label><input type="text" class="form-control" data-live-server-field="stream_key_prefix" value="' + escapeHtml(server.stream_key_prefix || '') + '"></div>' +
+                '</div>' +
+                '<div class="row m-t-10">' +
+                    '<div class="col-lg-4 col-md-12"><label class="form-label">URL RTMP de publication</label><input type="text" class="form-control" data-live-server-field="publish_url" value="' + escapeHtml(server.publish_url || '') + '"></div>' +
+                    '<div class="col-lg-4 col-md-12"><label class="form-label">URL HLS de lecture</label><input type="text" class="form-control" data-live-server-field="playback_url" value="' + escapeHtml(server.playback_url || '') + '"></div>' +
+                    '<div class="col-lg-4 col-md-12"><label class="form-label">URL WebRTC de lecture</label><input type="text" class="form-control" data-live-server-field="webrtc_url" value="' + escapeHtml(server.webrtc_url || '') + '"></div>' +
+                '</div>' +
+                '<div class="row m-t-10">' +
+                    '<div class="col-lg-12"><label class="form-label">URL de page studio navigateur</label><input type="text" class="form-control" data-live-server-field="publish_page_url" value="' + escapeHtml(server.publish_page_url || '') + '"><small class="admin-info">Base de publication navigateur. Le studio utilisera ensuite `.../stream_name/publish`.</small></div>' +
+                '</div>' +
+                '<div class="row m-t-10">' +
+                    '<div class="col-lg-12"><label class="form-label">Description</label><textarea class="form-control" rows="2" data-live-server-field="description">' + escapeHtml(server.description || '') + '</textarea></div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+}
+function RenderExternalLiveServers() {
+    var html = '';
+    if (!PT_EXTERNAL_LIVE_SERVERS.length) {
+        html = '<div class="alert alert-light">Aucun serveur externe configuré.</div>';
+    } else {
+        PT_EXTERNAL_LIVE_SERVERS.forEach(function (server, index) {
+            html += BuildExternalLiveServerCard(server, index);
+        });
+    }
+    $('.external-live-servers-list').html(html);
+    BindExternalLiveServerEvents();
+}
+function BindExternalLiveServerEvents() {
+    $('.external-live-server-card [data-live-server-field]').off('input change').on('input change', function () {
+        var card = $(this).closest('.external-live-server-card');
+        var index = Number(card.data('index'));
+        var field = $(this).data('live-server-field');
+        PT_EXTERNAL_LIVE_SERVERS[index][field] = $(this).val();
+        SaveExternalLiveServers();
+    });
+}
+function AddExternalLiveServer() {
+    PT_EXTERNAL_LIVE_SERVERS.push({
+        name: '',
+        id: '',
+        enabled: '1',
+        browser_enabled: '0',
+        encoder_enabled: '1',
+        publish_url: '',
+        publish_page_url: '',
+        playback_url: '',
+        webrtc_url: '',
+        stream_key_prefix: '',
+        description: ''
+    });
+    RenderExternalLiveServers();
+    SaveExternalLiveServers();
+}
+function RemoveExternalLiveServer(index) {
+    PT_EXTERNAL_LIVE_SERVERS.splice(index, 1);
+    RenderExternalLiveServers();
+    SaveExternalLiveServers();
+}
+function SaveExternalLiveServers() {
+    var payload = JSON.stringify(PT_EXTERNAL_LIVE_SERVERS);
+    $('#live_external_servers_json').val(payload);
+    $('.external-live-servers-alert').html('<div class="alert alert-info">Sauvegarde des serveurs externes...</div>');
+    $.post('{{LINK aj/ap/save-settings}}', {
+        live_external_servers_json: payload,
+        hash_id: $('input[name=hash_id]').val()
+    }, function (data) {
+        if (data.status == 200) {
+            $('.external-live-servers-alert').html('<div class="alert alert-success">Serveurs externes sauvegardés.</div>');
+        } else {
+            $('.external-live-servers-alert').html('<div class="alert alert-danger">Impossible de sauvegarder les serveurs externes.</div>');
+        }
+    });
+}
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+function toggleLiveProviderPanels() {
+    var provider = $('#live_provider').val();
+    if (provider == 'chef_live') {
+        $('.chef-live-settings-panel').removeClass('chef-live-disabled');
+        $('.chef-live-runtime-panel').removeClass('chef-live-disabled');
+    } else {
+        $('.chef-live-settings-panel').addClass('chef-live-disabled');
+        $('.chef-live-runtime-panel').addClass('chef-live-disabled');
+    }
+}
+function renderChefLivePaths(paths) {
+    var html = '';
+    if (!paths || !paths.length) {
+        html = '<tr><td colspan="5" class="text-center text-muted">Aucun flux actif sur le moteur.</td></tr>';
+    } else {
+        paths.forEach(function (path) {
+            html += '<tr>' +
+                '<td>' + (path.name || '-') + '</td>' +
+                '<td>' + (path.ready ? 'Oui' : 'Non') + '</td>' +
+                '<td>' + (path.readers || 0) + '</td>' +
+                '<td>' + (path.source || '-') + '</td>' +
+                '<td>' + (path.bytesReceived || 0) + '</td>' +
+            '</tr>';
+        });
+    }
+    $('.chef-live-paths-body').html(html);
+}
+function RefreshChefLiveRuntime() {
+    $('.chef-live-runtime-alert').html('<div class="alert alert-info">Chargement de l’état Chef Live...</div>');
+    $.get('{{LINK aj/ap/chef-live-runtime}}', function (data) {
+        if (data.status == 200) {
+            var runtime = data.runtime || {};
+            var summary = runtime.summary || {};
+            $('.chef-live-stat-api').text(runtime.service_ok ? 'En ligne' : 'Hors ligne');
+            $('.chef-live-stat-engine').text(runtime.engine_api_ok ? 'Connecté' : 'Indisponible');
+            $('.chef-live-stat-paths').text(summary.active_paths || 0);
+            $('.chef-live-stat-streams').text(summary.registered_streams || 0);
+            renderChefLivePaths(runtime.paths || []);
+            var notes = [
+                'Chemins prêts: ' + (summary.ready_paths || 0),
+                'Enregistrement: ' + (summary.recording_enabled ? 'activé' : 'désactivé'),
+                'Transcodage: ' + (summary.transcoding_enabled ? 'activé' : 'désactivé'),
+                'Métriques: ' + (runtime.metrics_ok ? 'disponibles' : 'non disponibles')
+            ];
+            $('.chef-live-runtime-alert').html('<div class="alert alert-success">' + notes.join('<br>') + '</div>');
+        } else {
+            $('.chef-live-stat-api').text('Erreur');
+            $('.chef-live-stat-engine').text('Erreur');
+            renderChefLivePaths([]);
+            $('.chef-live-runtime-alert').html('<div class="alert alert-danger">' + (data.message || 'Impossible de charger l’état Chef Live.') + '</div>');
+        }
+    });
+}
+function ChefLiveHealth() {
+    $('.chef-live-health-alert').html('<div class="alert alert-info">Vérification de Chef Live en cours...</div>');
+    $.get('{{LINK aj/ap/chef-live-health}}', function (data) {
+        if (data.status == 200) {
+            var config = data.data && data.data.config ? data.data.config : {};
+            var details = [
+                'Chef Live répond correctement.',
+                'RTMP: ' + (config.chef_live_rtmp_url || $('[name=chef_live_rtmp_url]').val() || '-'),
+                'HLS: ' + (config.chef_live_hls_url || $('[name=chef_live_hls_url]').val() || '-'),
+                'WebRTC: ' + (config.chef_live_webrtc_url || $('[name=chef_live_webrtc_url]').val() || '-')
+            ];
+            $('.chef-live-health-alert').html('<div class="alert alert-success">' + details.join('<br>') + '</div>');
+        } else {
+            $('.chef-live-health-alert').html('<div class="alert alert-danger">' + (data.message || 'Chef Live ne répond pas.') + '</div>');
+        }
+    });
+}
+function applyChefLiveConfig(config) {
+    Object.keys(config || {}).forEach(function (key) {
+        var field = $('[name="' + key + '"]');
+        if (!field.length) {
+            return;
+        }
+        if (field.attr('type') === 'checkbox') {
+            field.prop('checked', String(config[key]) === '1');
+            return;
+        }
+        field.val(config[key]);
+    });
+}
+function LoadChefLiveConfig() {
+    $('.chef-live-sync-alert').html('<div class="alert alert-info">Chargement de la configuration Chef Live...</div>');
+    $.get('{{LINK aj/ap/chef-live-config}}', function (data) {
+        if (data.status == 200) {
+            applyChefLiveConfig(data.config || {});
+            RefreshChefLiveRuntime();
+            $('.chef-live-sync-alert').html('<div class="alert alert-success">Configuration Chef Live chargée depuis le service.</div>');
+        } else {
+            $('.chef-live-sync-alert').html('<div class="alert alert-danger">' + (data.message || 'Impossible de charger la configuration Chef Live.') + '</div>');
+        }
+    });
+}
+function SyncChefLiveConfig() {
+    $('.chef-live-sync-alert').html('<div class="alert alert-info">Synchronisation de la configuration vers Chef Live...</div>');
+    $.post('{{LINK aj/ap/chef-live-sync}}', function (data) {
+        if (data.status == 200) {
+            applyChefLiveConfig(data.config || {});
+            RefreshChefLiveRuntime();
+            $('.chef-live-sync-alert').html('<div class="alert alert-success">' + (data.message || 'Configuration synchronisée.') + '</div>');
+        } else {
+            $('.chef-live-sync-alert').html('<div class="alert alert-danger">' + (data.message || 'Impossible de synchroniser Chef Live.') + '</div>');
+        }
+    });
+}
+function Wo_TestS3() {
+    $('form.agora-settings').find('.btn-warning').text('Veuillez patienter...');
+    $.get('{{LINK aj/ap/test_s3_2}}', function (data) {
+        if (data.status == 200) {
+            $('.agora-settings-alert').html('<div class="alert alert-success"><i class="fa fa-check"></i> Connexion établie !</div>');
+            setTimeout(function () {
+                $('.agora-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 300) {
+            $('.agora-settings-alert').html("<div class='alert alert-danger'>Le bucket n’existe pas.</div>");
+            setTimeout(function () {
+                $('.agora-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 500) {
+            $('.agora-settings-alert').html("<div class='alert alert-danger'>Votre compte S3 ne possède aucun bucket, veuillez en créer un.</div>");
+            setTimeout(function () {
+                $('.agora-settings-alert').empty();
+            }, 2000);
+        } else if (data.status == 400) {
+            $('.agora-settings-alert').html("<div class='alert alert-danger'>"+data.message+"</div>");
+            setTimeout(function () {
+                $('.agora-settings-alert').empty();
+            }, 2000);
+        } else  {
+            $('.agora-settings-alert').html("<div class='alert alert-danger'>Erreur lors de la connexion à Amazon, veuillez vérifier vos informations</div>");
+            setTimeout(function () {
+                $('.agora-settings-alert').empty();
+            }, 2000);
+        }
+        $('form.agora-settings').find('.btn-warning').text('Tester la connexion');
+    });
+}
+</script>
