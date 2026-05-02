@@ -1,11 +1,11 @@
-# Docker Install
+# Installation Docker
 
 ## Objectif
 
-Lancer la plateforme et `Chef Live` via `docker compose`, avec deux modes :
+Lancer la plateforme et `Chef Live` avec `docker compose`, selon deux modes :
 
 - installation vierge
-- initialisation depuis un dump SQL existant
+- initialisation depuis une sauvegarde SQL existante
 
 ## Préparation
 
@@ -15,7 +15,7 @@ Lancer la plateforme et `Chef Live` via `docker compose`, avec deux modes :
 cp .env.docker.example .env
 ```
 
-Pour un lancement local prêt à l'emploi avec le dump actuellement validé :
+Pour un lancement local prêt à l'emploi avec la sauvegarde actuellement validée :
 
 ```bash
 cp .env.docker.local.example .env.local
@@ -44,7 +44,7 @@ Lancer simplement :
 docker compose up -d --build
 ```
 
-La base sera créée vide. Ce mode est utile pour préparer une future procédure d'installation ou brancher un schéma vierge.
+La base sera créée vide. Ce mode est utile pour préparer une future procédure d'installation ou raccorder un schéma vierge.
 
 ## Base préchargée
 
@@ -60,13 +60,13 @@ Puis lancer :
 docker compose up -d --build
 ```
 
-Au premier démarrage du volume MariaDB, le dump sera importé automatiquement.
+Au premier démarrage du volume MariaDB, la sauvegarde sera importée automatiquement.
 
-Le script d'import désactive maintenant `FOREIGN_KEY_CHECKS` pendant le chargement, ce qui évite les imports partiels sur certains dumps historiques.
+Le script d'import désactive maintenant `FOREIGN_KEY_CHECKS` pendant le chargement, ce qui évite les imports partiels sur certaines sauvegardes historiques.
 
-## Reset local reproductible
+## Remise à zéro locale reproductible
 
-Pour repartir d'une stack locale propre avec suppression des volumes puis reconstruction complète :
+Pour repartir d'une pile locale propre avec suppression des volumes puis reconstruction complète :
 
 ```bash
 sh scripts/docker-reset-local.sh .env.local
@@ -90,7 +90,11 @@ docker ps
 curl http://127.0.0.1:8081/health
 ```
 
+## Documentation et dépôts
+
+Avant chaque dépôt Git, vérifier que cette documentation reste alignée avec les fichiers Docker publiés. Toute modification de ports, variables d'environnement, services, volumes, dépendances ou procédure de test doit être documentée dans ce fichier.
+
 ## Limites actuelles
 
-- la stack Docker web couvre maintenant l'accès aux scripts PHP avec les bons UID/GID, et les contextes de build ont été réduits par service pour accélérer les rebuilds; elle peut encore nécessiter des ajustements de règles Nginx selon les personnalisations historiques du site
-- l'application ne fournit pas dans ce dépôt un installateur moderne autonome; l'initialisation la plus fiable reste aujourd'hui l'import d'un dump SQL existant
+- la pile Docker web couvre maintenant l'accès aux scripts PHP avec les bons UID/GID, et les contextes de construction ont été réduits par service pour accélérer les reconstructions; elle peut encore nécessiter des ajustements de règles Nginx selon les personnalisations historiques du site
+- l'application ne fournit pas dans ce dépôt un installateur moderne autonome; l'initialisation la plus fiable reste aujourd'hui l'import d'une sauvegarde SQL existante
