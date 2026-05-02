@@ -1,0 +1,136 @@
+services:
+  nginx:
+    build:
+      context: ./deploy/docker/nginx
+      dockerfile: Dockerfile
+      args:
+        APP_UID: ${APP_UID:-10000}
+        APP_GID: ${APP_GID:-1003}
+    depends_on:
+      - php
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${APP_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./:/var/www/html
+    restart: unless-stopped
+
+  php:
+    build:
+      context: ./deploy/docker/php
+      dockerfile: Dockerfile
+      args:
+        APP_UID: ${APP_UID:-10000}
+        APP_GID: ${APP_GID:-1003}
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_NAME:-chefbe}
+      DB_USERNAME: ${DB_USER:-chefbe}
+      DB_PASSWORD: ${DB_PASSWORD:-change-me-db}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      LIVE_PROVIDER: ${LIVE_PROVIDER:-chef_live}
+      AGORA_ENABLED: ${AGORA_ENABLED:-1}
+      CHEF_LIVE_ENABLED: ${CHEF_LIVE_ENABLED:-1}
+      CHEF_LIVE_API_URL: http://chef-live:8081
+      CHEF_LIVE_RTMP_URL: rtmp://localhost:${CHEF_LIVE_RTMP_PORT:-1935}/live
+      CHEF_LIVE_HLS_URL: http://localhost:${CHEF_LIVE_HLS_PORT:-8088}/hls
+      CHEF_LIVE_WEBRTC_URL: http://localhost:${CHEF_LIVE_WEBRTC_PORT:-8889}/live
+    volumes:
+      - ./:/var/www/html
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.11
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change-me-root}
+      MYSQL_DATABASE: ${DB_NAME:-chefbe}
+      MYSQL_USER: ${DB_USER:-chefbe}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change-me-db}
+      DB_BOOTSTRAP_SQL: ${DB_BOOTSTRAP_SQL:-}
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${DB_PORT:-3306}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./deploy/docker/db/import-backup.sh:/docker-entrypoint-initdb.d/99-import-backup.sh:ro
+      - ./script_backups:/docker-entrypoint-initdb.d/backups:ro
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  nodejs:
+    build:
+      context: ./nodejs
+      dockerfile: ../deploy/docker/nodejs/Dockerfile
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: production
+      DB_HOSTNAME: db
+      DB_USERNAME: ${DB_USER:-chefbe}
+      DB_PASSWORD: ${DB_PASSWORD:-change-me-db}
+      DB_DBNAME: ${DB_NAME:-chefbe}
+      SITE_URL: ${APP_URL:-http://localhost:8080}
+      SERVER_IP: 0.0.0.0
+      SERVER_PORT: 3000
+      SSL: "false"
+    volumes:
+      - ./nodejs:/app
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${NODEJS_PORT:-3000}:3000"
+    restart: unless-stopped
+
+  chef-live:
+    build:
+      context: ./deploy/docker/chef-live
+      dockerfile: Dockerfile
+    depends_on:
+      - chef-live-engine
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${CHEF_LIVE_API_PORT:-8081}:8081"
+    environment:
+      CHEF_LIVE_API_PORT: 8081
+      CHEF_LIVE_RTMP_PORT: ${CHEF_LIVE_RTMP_PORT:-1935}
+      CHEF_LIVE_HLS_PORT: ${CHEF_LIVE_HLS_PORT:-8088}
+      CHEF_LIVE_WEBRTC_PORT: ${CHEF_LIVE_WEBRTC_PORT:-8889}
+      STORAGE_ROOT: /var/lib/chef-live
+      CHEF_LIVE_ENGINE_URL: http://chef-live-engine:9997
+      CHEF_LIVE_METRICS_URL: http://chef-live-engine:9998/metrics
+      S3_ENABLED: ${S3_ENABLED:-0}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+    volumes:
+      - chef_live_data:/var/lib/chef-live
+    restart: unless-stopped
+
+  chef-live-engine:
+    build:
+      context: ./deploy/docker/chef-live-engine
+      dockerfile: Dockerfile
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:${CHEF_LIVE_RTMP_PORT:-1935}:1935"
+      - "${HOST_BIND_IP:-127.0.0.1}:${CHEF_LIVE_HLS_PORT:-8088}:8888"
+      - "${HOST_BIND_IP:-127.0.0.1}:${CHEF_LIVE_WEBRTC_PORT:-8889}:8889"
+      - "${HOST_BIND_IP:-127.0.0.1}:${CHEF_LIVE_RTP_PORT:-10000}:10000/tcp"
+      - "${HOST_BIND_IP:-127.0.0.1}:${CHEF_LIVE_RTP_PORT:-10000}:10000/udp"
+    environment:
+      CHEF_LIVE_ENGINE_CONFIG_PATH: /var/lib/chef-live/mediamtx.yml
+    volumes:
+      - chef_live_data:/var/lib/chef-live
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  redis_data:
+  chef_live_data:
